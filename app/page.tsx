@@ -13,10 +13,10 @@ export default function Home() {
               Launching summer 2026
             </p>
             <h1 className="font-serif text-5xl md:text-6xl font-semibold text-[#2A2521] leading-[1.05] mb-6">
-              Black beauty + barbering, <span className="text-[#B8746E] italic font-medium">all in one place.</span>
+              Find your <span className="text-[#B8746E] italic font-medium">maintenance</span> professional nearby.
             </h1>
             <p className="text-lg text-[#3D2F2A] mb-10 max-w-xl mx-auto leading-relaxed">
-              The UK&apos;s home for Black beauty and grooming professionals. Braids, barbering, lashes, brows, skincare — book with someone who gets you.
+              The UK&apos;s home for Black hair, beauty, and grooming pros. Braids, barbering, lashes, brows, nails, skincare — book with someone who gets you.
             </p>
             <WaitlistForm />
           </div>

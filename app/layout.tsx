@@ -15,9 +15,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Nana's Hub — Black beauty and barbering professionals near you",
+  title: "Nana's Hub — Find your maintenance professional nearby",
   description:
-    "The UK's home for Black beauty and grooming pros. Braids, barbering, lashes, brows, skincare — book with someone who gets you.",
+    "The UK's home for Black hair, beauty, and grooming pros. Braids, barbering, lashes, brows, nails, skincare — book with someone who gets you.",
 };
 
 export default function RootLayout({

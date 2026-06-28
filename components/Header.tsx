@@ -27,13 +27,48 @@ export default function Header() {
 
   return (
     <header className="border-b border-[#E8DCD0] bg-[#FBF8F5]">
-      <div className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
-        <Link
-          href="/"
-          className="font-serif text-xl sm:text-2xl font-medium text-[#B8746E]"
-          style={{ letterSpacing: "0.32em" }}
-        >
-          NANA&apos;S HUB
+      <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+        <Link href="/" className="flex items-center" aria-label="Nana's Hub home">
+          <svg
+            width="210"
+            height="42"
+            viewBox="0 0 280 48"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <text
+              x="13"
+              y="36"
+              fontFamily="Georgia, 'Times New Roman', serif"
+              fontSize="32"
+              fontWeight="500"
+              fill="#DDB4B0"
+              letterSpacing="-2"
+            >
+              NH
+            </text>
+            <text
+              x="11"
+              y="34"
+              fontFamily="Georgia, 'Times New Roman', serif"
+              fontSize="32"
+              fontWeight="500"
+              fill="#B8746E"
+              letterSpacing="-2"
+            >
+              NH
+            </text>
+            <line x1="58" y1="14" x2="58" y2="36" stroke="#B5A89A" strokeWidth="0.8" />
+            <text
+              x="70"
+              y="32"
+              fontFamily="Georgia, serif"
+              fontSize="13"
+              fill="#B8746E"
+              letterSpacing="5"
+            >
+              NANA&apos;S HUB
+            </text>
+          </svg>
         </Link>
         {loaded && (
           <nav className="flex items-center gap-3 sm:gap-4">

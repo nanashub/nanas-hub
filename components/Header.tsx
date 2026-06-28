@@ -28,7 +28,11 @@ export default function Header() {
   return (
     <header className="border-b border-[#E8DCD0] bg-[#FBF8F5]">
       <div className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
-        <Link href="/" className="font-serif text-2xl font-semibold text-[#B8746E] tracking-[0.2em]">
+        <Link
+          href="/"
+          className="font-serif text-xl sm:text-2xl font-medium text-[#B8746E]"
+          style={{ letterSpacing: "0.32em" }}
+        >
           NANA&apos;S HUB
         </Link>
         {loaded && (

@@ -211,12 +211,12 @@ export default function PublicProProfile({ params }: { params: Promise<{ id: str
 
           <section className="text-center pt-4">
             {profile.accepting_bookings ? (
-              <button
-                disabled
-                className="bg-[#3D2F2A] text-white px-8 py-4 rounded-xl font-semibold text-sm opacity-70 cursor-not-allowed"
+              <Link
+                href={`/book/${profile.id}`}
+                className="inline-block bg-[#3D2F2A] text-white px-10 py-4 rounded-xl font-semibold text-sm hover:bg-[#5A4640] transition"
               >
-                Request booking (coming soon)
-              </button>
+                Request booking →
+              </Link>
             ) : (
               <div className="bg-[#F5EDE6] border border-[#DDB4B0] rounded-xl px-6 py-4 max-w-md mx-auto">
                 <p className="text-[#6B5F58] text-sm">Not accepting new bookings right now.</p>

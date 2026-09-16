@@ -33,13 +33,13 @@ export default function PublicProProfile({ params }: { params: Promise<{ id: str
 
   useEffect(() => {
     async function loadProfile() {
-      const { data: userProfile, error: userError } = await supabase
+      const { data: userProfile } = await supabase
         .from("profiles")
         .select("id, first_name, last_name, location_city, location_postcode, user_type")
         .eq("id", id)
         .single();
 
-      if (userError || !userProfile || userProfile.user_type !== "pro") {
+      if (!userProfile || userProfile.user_type !== "pro") {
         setNotFoundState(true);
         setLoading(false);
         return;
@@ -77,7 +77,6 @@ export default function PublicProProfile({ params }: { params: Promise<{ id: str
       });
       setLoading(false);
     }
-
     loadProfile();
   }, [id]);
 
@@ -86,7 +85,7 @@ export default function PublicProProfile({ params }: { params: Promise<{ id: str
       <>
         <Header />
         <main className="min-h-[calc(100vh-200px)] flex items-center justify-center">
-          <p className="text-[#6B5F58]">Loading…</p>
+          <p className="text-[#6B5F58]">Loading...</p>
         </main>
       </>
     );
@@ -98,8 +97,7 @@ export default function PublicProProfile({ params }: { params: Promise<{ id: str
         <Header />
         <main className="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center px-6 text-center">
           <h1 className="font-serif text-4xl font-semibold text-[#2A2521] mb-4">Professional not found</h1>
-          <p className="text-[#6B5F58] mb-8">This profile doesn&apos;t exist or has been removed.</p>
-          <Link href="/" className="text-[#B8746E] hover:underline font-semibold">← Back to home</Link>
+          <Link href="/" className="text-[#B8746E] hover:underline font-semibold">Back to home</Link>
         </main>
       </>
     );
@@ -107,6 +105,7 @@ export default function PublicProProfile({ params }: { params: Promise<{ id: str
 
   const displayName = profile.business_name || `${profile.first_name || ""} ${profile.last_name || ""}`.trim() || "Professional";
   const initials = `${profile.first_name?.[0] || ""}${profile.last_name?.[0] || ""}`.toUpperCase();
+  const proButtonClass = "inline-block bg-[#3D2F2A] text-white px-10 py-4 rounded-xl font-semibold text-sm hover:bg-[#5A4640] transition";
 
   return (
     <>
@@ -124,7 +123,7 @@ export default function PublicProProfile({ params }: { params: Promise<{ id: str
                 {profile.location_city && (
                   <p className="text-[#3D2F2A] mt-2">
                     {profile.location_city}
-                    {profile.location_postcode && ` · ${profile.location_postcode}`}
+                    {profile.location_postcode && ` - ${profile.location_postcode}`}
                   </p>
                 )}
               </div>
@@ -176,7 +175,7 @@ export default function PublicProProfile({ params }: { params: Promise<{ id: str
               )}
               {profile.location_type === "either" && (
                 <>
-                  <p className="text-[#2A2521] font-semibold">Mobile & salon</p>
+                  <p className="text-[#2A2521] font-semibold">Mobile and salon</p>
                   <p className="text-[#6B5F58] text-sm mt-1">
                     Available at their salon or up to {profile.service_radius_miles} miles from home.
                   </p>
@@ -186,45 +185,28 @@ export default function PublicProProfile({ params }: { params: Promise<{ id: str
             </div>
           </section>
 
-          <section>
-            <h2 className="text-xs uppercase tracking-widest text-[#B8746E] font-semibold mb-3">Services</h2>
-            <div className="bg-white border border-[#E8DCD0] rounded-2xl p-5 text-center">
-              <p className="text-[#6B5F58] text-sm italic">Services list coming soon</p>
-            </div>
-          </section>
-
           <section className="text-center pt-4 space-y-3">
-            {profile.accepting_bookings ? (
-              <>
-                {profile.external_booking_url ? (
-                  <>
-                    
-                      href={profile.external_booking_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-block bg-[#3D2F2A] text-white px-10 py-4 rounded-xl font-semibold text-sm hover:bg-[#5A4640] transition"
-                    >
-                      Book now ↗
-                    </a>
-                    <div>
-                      <Link href={`/book/${profile.id}`} className="text-sm text-[#B8746E] hover:underline">
-                        Or request a custom date &amp; time
-                      </Link>
-                    </div>
-                  </>
-                ) : (
-                  <Link
-                    href={`/book/${profile.id}`}
-                    className="inline-block bg-[#3D2F2A] text-white px-10 py-4 rounded-xl font-semibold text-sm hover:bg-[#5A4640] transition"
-                  >
-                    Request booking →
-                  </Link>
-                )}
-              </>
-            ) : (
+            {!profile.accepting_bookings && (
               <div className="bg-[#F5EDE6] border border-[#DDB4B0] rounded-xl px-6 py-4 max-w-md mx-auto">
                 <p className="text-[#6B5F58] text-sm">Not accepting new bookings right now.</p>
               </div>
+            )}
+            {profile.accepting_bookings && profile.external_booking_url && (
+              <>
+                <a href={profile.external_booking_url} target="_blank" rel="noopener noreferrer" className={proButtonClass}>
+                  Book now
+                </a>
+                <div>
+                  <Link href={`/book/${profile.id}`} className="text-sm text-[#B8746E] hover:underline">
+                    Or request a custom date and time
+                  </Link>
+                </div>
+              </>
+            )}
+            {profile.accepting_bookings && !profile.external_booking_url && (
+              <Link href={`/book/${profile.id}`} className={proButtonClass}>
+                Request booking
+              </Link>
             )}
           </section>
         </div>

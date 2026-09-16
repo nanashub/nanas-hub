@@ -14,6 +14,7 @@ type ProProfile = {
   salon_address: string;
   service_radius_miles: number;
   instagram_handle: string;
+  external_booking_url: string;
   accepting_bookings: boolean;
 };
 
@@ -32,6 +33,7 @@ export default function ProEditPage() {
     salon_address: "",
     service_radius_miles: 5,
     instagram_handle: "",
+    external_booking_url: "",
     accepting_bookings: true,
   });
 
@@ -44,22 +46,13 @@ export default function ProEditPage() {
       }
       setUserId(user.id);
 
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("user_type")
-        .eq("id", user.id)
-        .single();
-
+      const { data: profile } = await supabase.from("profiles").select("user_type").eq("id", user.id).single();
       if (profile?.user_type !== "pro") {
         router.push("/account");
         return;
       }
 
-      const { data: proProfile } = await supabase
-        .from("professional_profiles")
-        .select("*")
-        .eq("user_id", user.id)
-        .maybeSingle();
+      const { data: proProfile } = await supabase.from("professional_profiles").select("*").eq("user_id", user.id).maybeSingle();
 
       if (proProfile) {
         setForm({
@@ -70,10 +63,10 @@ export default function ProEditPage() {
           salon_address: proProfile.salon_address || "",
           service_radius_miles: proProfile.service_radius_miles || 5,
           instagram_handle: proProfile.instagram_handle || "",
+          external_booking_url: proProfile.external_booking_url || "",
           accepting_bookings: proProfile.accepting_bookings ?? true,
         });
       }
-
       setLoading(false);
     }
     loadProfile();
@@ -86,22 +79,9 @@ export default function ProEditPage() {
     setSaved(false);
     setError("");
 
-    const { data: existing } = await supabase
-      .from("professional_profiles")
-      .select("id")
-      .eq("user_id", userId)
-      .maybeSingle();
+    const { data: existing } = await supabase.from("professional_profiles").select("id").eq("user_id", userId).maybeSingle();
 
-    const payload = {
-      business_name: form.business_name,
-      bio: form.bio,
-      years_experience: form.years_experience,
-      location_type: form.location_type,
-      salon_address: form.salon_address,
-      service_radius_miles: form.service_radius_miles,
-      instagram_handle: form.instagram_handle,
-      accepting_bookings: form.accepting_bookings,
-    };
+    const payload = { ...form };
 
     const result = existing
       ? await supabase.from("professional_profiles").update(payload).eq("user_id", userId)
@@ -112,96 +92,44 @@ export default function ProEditPage() {
       setSaving(false);
       return;
     }
-
     setSaved(true);
     setSaving(false);
     setTimeout(() => setSaved(false), 3000);
   }
 
-  if (loading) {
-    return (
-      <>
-        <Header />
-        <main className="min-h-[calc(100vh-200px)] flex items-center justify-center">
-          <p className="text-[#6B5F58]">Loading…</p>
-        </main>
-      </>
-    );
-  }
+  if (loading) return (<><Header /><main className="min-h-[calc(100vh-200px)] flex items-center justify-center"><p className="text-[#6B5F58]">Loading…</p></main></>);
 
   return (
     <>
       <Header />
       <main className="px-6 py-12">
         <div className="max-w-2xl mx-auto">
-          <Link href="/account" className="text-sm text-[#B8746E] hover:underline mb-4 inline-block">
-            ← Back to account
-          </Link>
-          <h1 className="font-serif text-4xl font-semibold text-[#2A2521] mb-2">
-            Your professional profile
-          </h1>
-          <p className="text-sm text-[#6B5F58] mb-8">
-            This is what clients will see when they find you on Nana&apos;s Hub.
-          </p>
+          <Link href="/account" className="text-sm text-[#B8746E] hover:underline mb-4 inline-block">← Back to account</Link>
+          <h1 className="font-serif text-4xl font-semibold text-[#2A2521] mb-2">Your professional profile</h1>
+          <p className="text-sm text-[#6B5F58] mb-8">This is what clients will see when they find you on Nana&apos;s Hub.</p>
 
           <form onSubmit={handleSave} className="space-y-6">
             <div>
-              <label className="block text-xs uppercase tracking-wider text-[#3D2F2A] font-semibold mb-2">
-                Business name
-              </label>
-              <input
-                type="text"
-                value={form.business_name}
-                onChange={(e) => setForm({...form, business_name: e.target.value})}
-                placeholder="e.g. Ama Glow Hair"
-                className="w-full px-4 py-3 rounded-xl bg-white border border-[#E8DCD0] outline-none focus:border-[#B8746E] text-[#2A2521]"
-              />
+              <label className="block text-xs uppercase tracking-wider text-[#3D2F2A] font-semibold mb-2">Business name</label>
+              <input type="text" value={form.business_name} onChange={(e) => setForm({...form, business_name: e.target.value})} placeholder="e.g. Ama Glow Hair" className="w-full px-4 py-3 rounded-xl bg-white border border-[#E8DCD0] outline-none focus:border-[#B8746E] text-[#2A2521]"/>
             </div>
 
             <div>
-              <label className="block text-xs uppercase tracking-wider text-[#3D2F2A] font-semibold mb-2">
-                About you
-              </label>
-              <textarea
-                value={form.bio}
-                onChange={(e) => setForm({...form, bio: e.target.value})}
-                placeholder="Tell clients about your specialties, training, what makes your work different..."
-                rows={5}
-                maxLength={500}
-                className="w-full px-4 py-3 rounded-xl bg-white border border-[#E8DCD0] outline-none focus:border-[#B8746E] text-[#2A2521] resize-none"
-              />
+              <label className="block text-xs uppercase tracking-wider text-[#3D2F2A] font-semibold mb-2">About you</label>
+              <textarea value={form.bio} onChange={(e) => setForm({...form, bio: e.target.value})} placeholder="Tell clients about your specialties, training, what makes your work different..." rows={5} maxLength={500} className="w-full px-4 py-3 rounded-xl bg-white border border-[#E8DCD0] outline-none focus:border-[#B8746E] text-[#2A2521] resize-none"/>
               <p className="text-xs text-[#6B5F58] mt-1">{form.bio.length} / 500 characters</p>
             </div>
 
             <div>
-              <label className="block text-xs uppercase tracking-wider text-[#3D2F2A] font-semibold mb-2">
-                Years of experience
-              </label>
-              <input
-                type="number"
-                min="0"
-                value={form.years_experience}
-                onChange={(e) => setForm({...form, years_experience: parseInt(e.target.value) || 0})}
-                className="w-full px-4 py-3 rounded-xl bg-white border border-[#E8DCD0] outline-none focus:border-[#B8746E] text-[#2A2521]"
-              />
+              <label className="block text-xs uppercase tracking-wider text-[#3D2F2A] font-semibold mb-2">Years of experience</label>
+              <input type="number" min="0" value={form.years_experience} onChange={(e) => setForm({...form, years_experience: parseInt(e.target.value) || 0})} className="w-full px-4 py-3 rounded-xl bg-white border border-[#E8DCD0] outline-none focus:border-[#B8746E] text-[#2A2521]"/>
             </div>
 
             <div>
-              <label className="block text-xs uppercase tracking-wider text-[#3D2F2A] font-semibold mb-2">
-                Where do you work?
-              </label>
+              <label className="block text-xs uppercase tracking-wider text-[#3D2F2A] font-semibold mb-2">Where do you work?</label>
               <div className="grid grid-cols-3 gap-2">
                 {(["mobile", "salon", "either"] as const).map((opt) => (
-                  <button
-                    key={opt}
-                    type="button"
-                    onClick={() => setForm({...form, location_type: opt})}
-                    className={`py-3 rounded-xl text-sm font-semibold uppercase tracking-wider transition ${
-                      form.location_type === opt
-                        ? "bg-[#3D2F2A] text-white"
-                        : "bg-white/60 text-[#3D2F2A] border border-[#E8DCD0]"
-                    }`}
-                  >
+                  <button key={opt} type="button" onClick={() => setForm({...form, location_type: opt})} className={`py-3 rounded-xl text-sm font-semibold uppercase tracking-wider transition ${form.location_type === opt ? "bg-[#3D2F2A] text-white" : "bg-white/60 text-[#3D2F2A] border border-[#E8DCD0]"}`}>
                     {opt === "mobile" ? "I travel" : opt === "salon" ? "My salon" : "Either"}
                   </button>
                 ))}
@@ -210,49 +138,32 @@ export default function ProEditPage() {
 
             {(form.location_type === "salon" || form.location_type === "either") && (
               <div>
-                <label className="block text-xs uppercase tracking-wider text-[#3D2F2A] font-semibold mb-2">
-                  Salon address
-                </label>
-                <input
-                  type="text"
-                  value={form.salon_address}
-                  onChange={(e) => setForm({...form, salon_address: e.target.value})}
-                  placeholder="e.g. 42 Rye Lane, Peckham SE15 4ST"
-                  className="w-full px-4 py-3 rounded-xl bg-white border border-[#E8DCD0] outline-none focus:border-[#B8746E] text-[#2A2521]"
-                />
+                <label className="block text-xs uppercase tracking-wider text-[#3D2F2A] font-semibold mb-2">Salon address</label>
+                <input type="text" value={form.salon_address} onChange={(e) => setForm({...form, salon_address: e.target.value})} placeholder="e.g. 42 Rye Lane, Peckham SE15 4ST" className="w-full px-4 py-3 rounded-xl bg-white border border-[#E8DCD0] outline-none focus:border-[#B8746E] text-[#2A2521]"/>
               </div>
             )}
 
             {(form.location_type === "mobile" || form.location_type === "either") && (
               <div>
-                <label className="block text-xs uppercase tracking-wider text-[#3D2F2A] font-semibold mb-2">
-                  How far will you travel? (miles)
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={form.service_radius_miles}
-                  onChange={(e) => setForm({...form, service_radius_miles: parseInt(e.target.value) || 0})}
-                  className="w-full px-4 py-3 rounded-xl bg-white border border-[#E8DCD0] outline-none focus:border-[#B8746E] text-[#2A2521]"
-                />
+                <label className="block text-xs uppercase tracking-wider text-[#3D2F2A] font-semibold mb-2">How far will you travel? (miles)</label>
+                <input type="number" min="0" max="100" value={form.service_radius_miles} onChange={(e) => setForm({...form, service_radius_miles: parseInt(e.target.value) || 0})} className="w-full px-4 py-3 rounded-xl bg-white border border-[#E8DCD0] outline-none focus:border-[#B8746E] text-[#2A2521]"/>
               </div>
             )}
 
             <div>
-              <label className="block text-xs uppercase tracking-wider text-[#3D2F2A] font-semibold mb-2">
-                Instagram handle (optional)
-              </label>
+              <label className="block text-xs uppercase tracking-wider text-[#3D2F2A] font-semibold mb-2">Instagram handle (optional)</label>
               <div className="flex">
                 <span className="px-4 py-3 rounded-l-xl bg-[#F5EDE6] border border-r-0 border-[#E8DCD0] text-[#6B5F58]">@</span>
-                <input
-                  type="text"
-                  value={form.instagram_handle}
-                  onChange={(e) => setForm({...form, instagram_handle: e.target.value.replace("@", "")})}
-                  placeholder="amaglowhair"
-                  className="flex-1 px-4 py-3 rounded-r-xl bg-white border border-[#E8DCD0] outline-none focus:border-[#B8746E] text-[#2A2521]"
-                />
+                <input type="text" value={form.instagram_handle} onChange={(e) => setForm({...form, instagram_handle: e.target.value.replace("@", "")})} placeholder="amaglowhair" className="flex-1 px-4 py-3 rounded-r-xl bg-white border border-[#E8DCD0] outline-none focus:border-[#B8746E] text-[#2A2521]"/>
               </div>
+            </div>
+
+            <div>
+              <label className="block text-xs uppercase tracking-wider text-[#3D2F2A] font-semibold mb-2">
+                External booking link (optional)
+              </label>
+              <input type="url" value={form.external_booking_url} onChange={(e) => setForm({...form, external_booking_url: e.target.value})} placeholder="https://yourname.acuityscheduling.com" className="w-full px-4 py-3 rounded-xl bg-white border border-[#E8DCD0] outline-none focus:border-[#B8746E] text-[#2A2521]"/>
+              <p className="text-xs text-[#6B5F58] mt-1">If you already use Acuity, Square, Fresha, or Calendly, paste your booking link here. Clients will be able to book through your existing system.</p>
             </div>
 
             <div className="bg-white border border-[#E8DCD0] rounded-xl p-4 flex items-center justify-between">
@@ -260,36 +171,18 @@ export default function ProEditPage() {
                 <p className="font-semibold text-[#2A2521]">Accepting bookings</p>
                 <p className="text-xs text-[#6B5F58] mt-1">Turn off to pause new requests temporarily.</p>
               </div>
-              <button
-                type="button"
-                onClick={() => setForm({...form, accepting_bookings: !form.accepting_bookings})}
-                className={`relative w-14 h-7 rounded-full transition ${
-                  form.accepting_bookings ? "bg-[#B8746E]" : "bg-[#E8DCD0]"
-                }`}
-              >
-                <span className={`absolute top-1 w-5 h-5 bg-white rounded-full transition ${
-                  form.accepting_bookings ? "left-8" : "left-1"
-                }`} />
+              <button type="button" onClick={() => setForm({...form, accepting_bookings: !form.accepting_bookings})} className={`relative w-14 h-7 rounded-full transition ${form.accepting_bookings ? "bg-[#B8746E]" : "bg-[#E8DCD0]"}`}>
+                <span className={`absolute top-1 w-5 h-5 bg-white rounded-full transition ${form.accepting_bookings ? "left-8" : "left-1"}`}/>
               </button>
             </div>
 
-            {error && (
-              <p className="text-sm text-[#B8746E] text-center">{error}</p>
-            )}
+            {error && <p className="text-sm text-[#B8746E] text-center">{error}</p>}
 
             <div className="flex items-center gap-4">
-              <button
-                type="submit"
-                disabled={saving}
-                className="bg-[#3D2F2A] text-white px-8 py-3 rounded-xl font-semibold text-sm hover:bg-[#5A4640] transition disabled:opacity-50"
-              >
+              <button type="submit" disabled={saving} className="bg-[#3D2F2A] text-white px-8 py-3 rounded-xl font-semibold text-sm hover:bg-[#5A4640] transition disabled:opacity-50">
                 {saving ? "Saving…" : "Save profile"}
               </button>
-              {saved && (
-                <p className="text-sm text-[#3D2F2A]">
-                  ✓ Saved successfully
-                </p>
-              )}
+              {saved && <p className="text-sm text-[#3D2F2A]">✓ Saved successfully</p>}
             </div>
           </form>
         </div>

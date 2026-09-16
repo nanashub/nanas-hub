@@ -127,77 +127,43 @@ export default function SearchPage() {
           </div>
         </section>
 
-        <section className="max-w-4xl mx-auto px-6 py-10">
-          {loading ? (
-            <p className="text-center text-[#6B5F58]">Loading pros…</p>
-          ) : filtered.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-[#2A2521] font-serif text-xl mb-2">No professionals found</p>
-              <p className="text-sm text-[#6B5F58]">
-                Try adjusting your filters, or check back soon as more pros join.
-              </p>
-            </div>
-          ) : (
-            <>
-              <p className="text-sm text-[#6B5F58] mb-6">
-                {filtered.length} {filtered.length === 1 ? "professional" : "professionals"} found
-              </p>
-              <div className="space-y-4">
-                {filtered.map((pro) => {
-                  const displayName =
-                    pro.business_name ||
-                    `${pro.first_name || ""} ${pro.last_name || ""}`.trim() ||
-                    "Professional";
-                  const initials = `${pro.first_name?.[0] || ""}${pro.last_name?.[0] || ""}`.toUpperCase();
-
-                  return (
-                    <Link
-                      key={pro.id}
-                      href={`/pros/${pro.id}`}
-                      className="block bg-white border border-[#E8DCD0] rounded-2xl p-5 hover:border-[#B8746E] transition"
-                    >
-                      <div className="flex gap-4">
-                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#DDB4B0] to-[#B8746E] flex items-center justify-center text-white font-serif text-xl font-semibold flex-shrink-0">
-                          {initials || "?"}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-serif text-lg font-semibold text-[#2A2521] truncate">
-                            {displayName}
-                          </h3>
-                          <p className="text-xs text-[#6B5F58] mb-2">
-                            {pro.location_city || "Location not set"}
-                            {" · "}
-                            {pro.location_type === "mobile" && "Mobile"}
-                            {pro.location_type === "salon" && "Salon"}
-                            {pro.location_type === "either" && "Mobile & salon"}
-                          </p>
-                          {pro.bio && (
-                            <p className="text-sm text-[#3D2F2A] line-clamp-2">{pro.bio}</p>
-                          )}
-                          <div className="flex items-center gap-3 mt-2 text-xs">
-                            <span className="text-[#B8746E] font-semibold">
-                              {pro.average_rating > 0
-                                ? `★ ${pro.average_rating.toFixed(1)}`
-                                : "New"}
-                            </span>
-                            {pro.total_reviews > 0 && (
-                              <span className="text-[#6B5F58]">
-                                {pro.total_reviews}{" "}
-                                {pro.total_reviews === 1 ? "review" : "reviews"}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
-            </>
-          )}
-        </section>
-      </main>
-      <Footer />
+<section className="text-center pt-4 space-y-3">
+  {profile.accepting_bookings ? (
+    <>
+      {profile.external_booking_url ? (
+        <>
+          
+            href={profile.external_booking_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block bg-[#3D2F2A] text-white px-10 py-4 rounded-xl font-semibold text-sm hover:bg-[#5A4640] transition"
+          >
+            Book now ↗
+          </a>
+          <div>
+            <Link
+              href={`/book/${profile.id}`}
+              className="text-sm text-[#B8746E] hover:underline"
+            >
+              Or request a custom date & time
+            </Link>
+          </div>
+        </>
+      ) : (
+        <Link
+          href={`/book/${profile.id}`}
+          className="inline-block bg-[#3D2F2A] text-white px-10 py-4 rounded-xl font-semibold text-sm hover:bg-[#5A4640] transition"
+        >
+          Request booking →
+        </Link>
+      )}
+    </>
+  ) : (
+    <div className="bg-[#F5EDE6] border border-[#DDB4B0] rounded-xl px-6 py-4 max-w-md mx-auto">
+      <p className="text-[#6B5F58] text-sm">Not accepting new bookings right now.</p>
+    </div>
+  )}
+</section>
     </>
   );
 }

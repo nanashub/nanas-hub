@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { supabase } from "@/lib/supabase/client";
 import Header from "@/components/Header";
 
@@ -99,12 +100,18 @@ export default function AccountPage() {
 
           {profile.user_type === "pro" && (
             <div className="bg-[#F5EDE6] border border-[#DDB4B0] rounded-2xl p-6 mb-6">
-              <h3 className="font-serif text-xl font-semibold text-[#2A2521] mb-2">
-                Coming next
+              <h3 className="font-serif text-2xl font-semibold text-[#2A2521] mb-2">
+                Your professional profile
               </h3>
-              <p className="text-sm text-[#3D2F2A]">
-                Your pro profile editor and dashboard are next on the build list. You&apos;ll be able to add your services, photos, and pricing, and start receiving booking requests soon.
+              <p className="text-sm text-[#3D2F2A] mb-5">
+                Set up your business details, services, and what makes you the right pro for your clients. This is what people will see when they find you on Nana&apos;s Hub.
               </p>
+              <Link
+                href="/pro/edit"
+                className="inline-block bg-[#3D2F2A] text-white px-6 py-3 rounded-xl font-semibold text-sm hover:bg-[#5A4640] transition"
+              >
+                Edit profile →
+              </Link>
             </div>
           )}
 

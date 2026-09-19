@@ -17,7 +17,7 @@ type ProProfile = {
   external_booking_url: string;
   slot_release_info: string;
   featured_video_url: string;
-  portfolio_images_text: string;
+  portfolio_images: string[];
   accepting_bookings: boolean;
 };
 
@@ -26,6 +26,7 @@ export default function ProEditPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
   const [userId, setUserId] = useState<string | null>(null);
   const [form, setForm] = useState<ProProfile>({
@@ -39,7 +40,7 @@ export default function ProEditPage() {
     external_booking_url: "",
     slot_release_info: "",
     featured_video_url: "",
-    portfolio_images_text: "",
+    portfolio_images: [],
     accepting_bookings: true,
   });
 
@@ -63,7 +64,7 @@ export default function ProEditPage() {
           external_booking_url: p.external_booking_url || "",
           slot_release_info: p.slot_release_info || "",
           featured_video_url: p.featured_video_url || "",
-          portfolio_images_text: (p.portfolio_images || []).join("\n"),
+          portfolio_images: p.portfolio_images || [],
           accepting_bookings: p.accepting_bookings ?? true,
         });
       }
@@ -72,29 +73,50 @@ export default function ProEditPage() {
     loadProfile();
   }, [router]);
 
+  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    if (!e.target.files || !userId) return;
+    setUploading(true);
+    setError("");
+    const files = Array.from(e.target.files);
+    const newUrls: string[] = [];
+
+    for (const file of files) {
+      if (!file.type.startsWith("image/")) {
+        setError("Only images are allowed");
+        continue;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        setError("Images must be under 5MB");
+        continue;
+      }
+      const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
+      const fileName = `${userId}/${Date.now()}-${safeName}`;
+      const { error: uploadError } = await supabase.storage.from("portfolio").upload(fileName, file);
+      if (uploadError) {
+        setError(uploadError.message);
+        continue;
+      }
+      const { data: urlData } = supabase.storage.from("portfolio").getPublicUrl(fileName);
+      newUrls.push(urlData.publicUrl);
+    }
+
+    setForm(prev => ({ ...prev, portfolio_images: [...prev.portfolio_images, ...newUrls] }));
+    setUploading(false);
+    e.target.value = "";
+  }
+
+  function removeImage(index: number) {
+    setForm(prev => ({ ...prev, portfolio_images: prev.portfolio_images.filter((_, i) => i !== index) }));
+  }
+
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
     if (!userId) return;
     setSaving(true); setSaved(false); setError("");
-    const portfolio_images = form.portfolio_images_text.split("\n").map(s => s.trim()).filter(s => s.length > 0);
-    const payload = {
-      business_name: form.business_name,
-      bio: form.bio,
-      years_experience: form.years_experience,
-      location_type: form.location_type,
-      salon_address: form.salon_address,
-      service_radius_miles: form.service_radius_miles,
-      instagram_handle: form.instagram_handle,
-      external_booking_url: form.external_booking_url,
-      slot_release_info: form.slot_release_info,
-      featured_video_url: form.featured_video_url,
-      portfolio_images,
-      accepting_bookings: form.accepting_bookings,
-    };
     const { data: existing } = await supabase.from("professional_profiles").select("id").eq("user_id", userId).maybeSingle();
     const result = existing
-      ? await supabase.from("professional_profiles").update(payload).eq("user_id", userId)
-      : await supabase.from("professional_profiles").insert({ ...payload, user_id: userId });
+      ? await supabase.from("professional_profiles").update(form).eq("user_id", userId)
+      : await supabase.from("professional_profiles").insert({ ...form, user_id: userId });
     if (result.error) { setError(result.error.message); setSaving(false); return; }
     setSaved(true); setSaving(false);
     setTimeout(() => setSaved(false), 3000);
@@ -160,7 +182,7 @@ export default function ProEditPage() {
             </div>
             <div>
               <label className="block text-xs uppercase tracking-wider text-[#3D2F2A] font-semibold mb-2">When do your slots come out?</label>
-              <input type="text" value={form.slot_release_info} onChange={(e) => setForm({...form, slot_release_info: e.target.value})} placeholder="e.g. Sundays 8pm, 1st of every month, monthly on Instagram" className="w-full px-4 py-3 rounded-xl bg-white border border-[#E8DCD0] outline-none focus:border-[#B8746E] text-[#2A2521]"/>
+              <input type="text" value={form.slot_release_info} onChange={(e) => setForm({...form, slot_release_info: e.target.value})} placeholder="e.g. Sundays 8pm, 1st of every month" className="w-full px-4 py-3 rounded-xl bg-white border border-[#E8DCD0] outline-none focus:border-[#B8746E] text-[#2A2521]"/>
               <p className="text-xs text-[#6B5F58] mt-1">Let clients know when you release new booking availability.</p>
             </div>
             <div className="pt-4 border-t border-[#E8DCD0]">
@@ -168,14 +190,35 @@ export default function ProEditPage() {
               <p className="text-sm text-[#6B5F58] mb-4">Show off your best work.</p>
             </div>
             <div>
-              <label className="block text-xs uppercase tracking-wider text-[#3D2F2A] font-semibold mb-2">Photo URLs (one per line)</label>
-              <textarea value={form.portfolio_images_text} onChange={(e) => setForm({...form, portfolio_images_text: e.target.value})} placeholder="https://example.com/photo1.jpg&#10;https://example.com/photo2.jpg" rows={5} className="w-full px-4 py-3 rounded-xl bg-white border border-[#E8DCD0] outline-none focus:border-[#B8746E] text-[#2A2521] resize-none font-mono text-sm"/>
-              <p className="text-xs text-[#6B5F58] mt-1">Paste photo URLs, one per line. You can right-click images on Instagram or your website and copy the image URL.</p>
+              <label className="block text-xs uppercase tracking-wider text-[#3D2F2A] font-semibold mb-2">Photos</label>
+              <label className="block cursor-pointer">
+                <div className="w-full px-4 py-6 rounded-xl bg-[#F5EDE6] border-2 border-dashed border-[#DDB4B0] text-center hover:bg-[#EFE4D9] transition">
+                  {uploading ? (
+                    <p className="text-[#3D2F2A] font-semibold">Uploading...</p>
+                  ) : (
+                    <>
+                      <p className="text-[#3D2F2A] font-semibold">Click to upload photos</p>
+                      <p className="text-xs text-[#6B5F58] mt-1">JPG, PNG, or GIF up to 5MB each. You can select multiple.</p>
+                    </>
+                  )}
+                </div>
+                <input type="file" accept="image/*" multiple onChange={handleFileUpload} disabled={uploading} className="hidden"/>
+              </label>
+              {form.portfolio_images.length > 0 && (
+                <div className="mt-4 grid grid-cols-3 gap-2">
+                  {form.portfolio_images.map((url, i) => (
+                    <div key={i} className="relative aspect-square rounded-lg overflow-hidden bg-[#F5EDE6] border border-[#E8DCD0]">
+                      <img src={url} alt={`Photo ${i + 1}`} className="w-full h-full object-cover"/>
+                      <button type="button" onClick={() => removeImage(i)} className="absolute top-1 right-1 w-6 h-6 rounded-full bg-white border border-[#E8DCD0] text-[#B8746E] text-xs font-bold hover:bg-[#F5EDE6]">×</button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
             <div>
               <label className="block text-xs uppercase tracking-wider text-[#3D2F2A] font-semibold mb-2">Featured video URL (optional)</label>
               <input type="url" value={form.featured_video_url} onChange={(e) => setForm({...form, featured_video_url: e.target.value})} placeholder="https://youtube.com/watch?v=..." className="w-full px-4 py-3 rounded-xl bg-white border border-[#E8DCD0] outline-none focus:border-[#B8746E] text-[#2A2521]"/>
-              <p className="text-xs text-[#6B5F58] mt-1">YouTube, TikTok, or Instagram video URL. Clients will see a link to watch.</p>
+              <p className="text-xs text-[#6B5F58] mt-1">YouTube, TikTok, or Instagram video URL.</p>
             </div>
             <div className="bg-white border border-[#E8DCD0] rounded-xl p-4 flex items-center justify-between">
               <div>

@@ -22,22 +22,11 @@ export default function AccountPage() {
   useEffect(() => {
     async function loadProfile() {
       const { data: { user } } = await supabase.auth.getUser();
-
-      if (!user) {
-        router.push("/login");
-        return;
-      }
-
-      const { data: profileData } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
-
+      if (!user) { router.push("/login"); return; }
+      const { data: profileData } = await supabase.from("profiles").select("*").eq("id", user.id).single();
       setProfile(profileData);
       setLoading(false);
     }
-
     loadProfile();
   }, [router]);
 
@@ -47,20 +36,8 @@ export default function AccountPage() {
     router.refresh();
   }
 
-  if (loading) {
-    return (
-      <>
-        <Header />
-        <main className="min-h-[calc(100vh-200px)] flex items-center justify-center">
-          <p className="text-[#6B5F58]">Loading…</p>
-        </main>
-      </>
-    );
-  }
-
-  if (!profile) {
-    return null;
-  }
+  if (loading) return (<><Header /><main className="min-h-[calc(100vh-200px)] flex items-center justify-center"><p className="text-[#6B5F58]">Loading...</p></main></>);
+  if (!profile) return null;
 
   return (
     <>
@@ -74,14 +51,11 @@ export default function AccountPage() {
             You&apos;re signed in as{" "}
             <span className="font-semibold text-[#B8746E] uppercase tracking-wider">
               {profile.user_type === "pro" ? "a professional" : "a client"}
-            </span>
-            .
+            </span>.
           </p>
 
           <div className="bg-white border border-[#E8DCD0] rounded-2xl p-6 mb-6">
-            <h2 className="font-serif text-2xl font-semibold text-[#2A2521] mb-4">
-              Your account
-            </h2>
+            <h2 className="font-serif text-2xl font-semibold text-[#2A2521] mb-4">Your account</h2>
             <dl className="space-y-3">
               <div>
                 <dt className="text-xs uppercase tracking-wider text-[#6B5F58] mb-1">Name</dt>
@@ -99,26 +73,36 @@ export default function AccountPage() {
           </div>
 
           {profile.user_type === "pro" && (
-            <div className="bg-[#F5EDE6] border border-[#DDB4B0] rounded-2xl p-6 mb-6">
-              <h3 className="font-serif text-2xl font-semibold text-[#2A2521] mb-2">
-                Your professional profile
-              </h3>
-              <p className="text-sm text-[#3D2F2A] mb-5">
-                Set up your business details, services, and what makes you the right pro for your clients. This is what people will see when they find you on Nana&apos;s Hub.
-              </p>
-              <Link
-                href="/pro/edit"
-                className="inline-block bg-[#3D2F2A] text-white px-6 py-3 rounded-xl font-semibold text-sm hover:bg-[#5A4640] transition"
-              >
-                Edit profile →
-              </Link>
-            </div>
+            <>
+              <div className="bg-[#F5EDE6] border border-[#DDB4B0] rounded-2xl p-6 mb-4">
+                <h3 className="font-serif text-2xl font-semibold text-[#2A2521] mb-2">Bookings dashboard</h3>
+                <p className="text-sm text-[#3D2F2A] mb-5">
+                  See your pending booking requests, accept or decline them, and track upcoming appointments.
+                </p>
+                <Link
+                  href="/pro/dashboard"
+                  className="inline-block bg-[#3D2F2A] text-white px-6 py-3 rounded-xl font-semibold text-sm hover:bg-[#5A4640] transition"
+                >
+                  Open dashboard →
+                </Link>
+              </div>
+
+              <div className="bg-white border border-[#E8DCD0] rounded-2xl p-6 mb-6">
+                <h3 className="font-serif text-2xl font-semibold text-[#2A2521] mb-2">Your professional profile</h3>
+                <p className="text-sm text-[#3D2F2A] mb-5">
+                  Set up your business details, photos, services, and highlights.
+                </p>
+                <Link
+                  href="/pro/edit"
+                  className="inline-block border border-[#3D2F2A] text-[#3D2F2A] px-6 py-3 rounded-xl font-semibold text-sm hover:bg-[#3D2F2A] hover:text-white transition"
+                >
+                  Edit profile →
+                </Link>
+              </div>
+            </>
           )}
 
-          <button
-            onClick={handleLogout}
-            className="text-sm text-[#B8746E] hover:underline font-semibold"
-          >
+          <button onClick={handleLogout} className="text-sm text-[#B8746E] hover:underline font-semibold">
             Log out
           </button>
         </div>

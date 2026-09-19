@@ -15,6 +15,9 @@ type ProProfile = {
   service_radius_miles: number;
   instagram_handle: string;
   external_booking_url: string;
+  slot_release_info: string;
+  featured_video_url: string;
+  portfolio_images_text: string;
   accepting_bookings: boolean;
 };
 
@@ -34,6 +37,9 @@ export default function ProEditPage() {
     service_radius_miles: 5,
     instagram_handle: "",
     external_booking_url: "",
+    slot_release_info: "",
+    featured_video_url: "",
+    portfolio_images_text: "",
     accepting_bookings: true,
   });
 
@@ -44,18 +50,21 @@ export default function ProEditPage() {
       setUserId(user.id);
       const { data: profile } = await supabase.from("profiles").select("user_type").eq("id", user.id).single();
       if (profile?.user_type !== "pro") { router.push("/account"); return; }
-      const { data: proProfile } = await supabase.from("professional_profiles").select("*").eq("user_id", user.id).maybeSingle();
-      if (proProfile) {
+      const { data: p } = await supabase.from("professional_profiles").select("*").eq("user_id", user.id).maybeSingle();
+      if (p) {
         setForm({
-          business_name: proProfile.business_name || "",
-          bio: proProfile.bio || "",
-          years_experience: proProfile.years_experience || 0,
-          location_type: proProfile.location_type || "mobile",
-          salon_address: proProfile.salon_address || "",
-          service_radius_miles: proProfile.service_radius_miles || 5,
-          instagram_handle: proProfile.instagram_handle || "",
-          external_booking_url: proProfile.external_booking_url || "",
-          accepting_bookings: proProfile.accepting_bookings ?? true,
+          business_name: p.business_name || "",
+          bio: p.bio || "",
+          years_experience: p.years_experience || 0,
+          location_type: p.location_type || "mobile",
+          salon_address: p.salon_address || "",
+          service_radius_miles: p.service_radius_miles || 5,
+          instagram_handle: p.instagram_handle || "",
+          external_booking_url: p.external_booking_url || "",
+          slot_release_info: p.slot_release_info || "",
+          featured_video_url: p.featured_video_url || "",
+          portfolio_images_text: (p.portfolio_images || []).join("\n"),
+          accepting_bookings: p.accepting_bookings ?? true,
         });
       }
       setLoading(false);
@@ -67,10 +76,25 @@ export default function ProEditPage() {
     e.preventDefault();
     if (!userId) return;
     setSaving(true); setSaved(false); setError("");
+    const portfolio_images = form.portfolio_images_text.split("\n").map(s => s.trim()).filter(s => s.length > 0);
+    const payload = {
+      business_name: form.business_name,
+      bio: form.bio,
+      years_experience: form.years_experience,
+      location_type: form.location_type,
+      salon_address: form.salon_address,
+      service_radius_miles: form.service_radius_miles,
+      instagram_handle: form.instagram_handle,
+      external_booking_url: form.external_booking_url,
+      slot_release_info: form.slot_release_info,
+      featured_video_url: form.featured_video_url,
+      portfolio_images,
+      accepting_bookings: form.accepting_bookings,
+    };
     const { data: existing } = await supabase.from("professional_profiles").select("id").eq("user_id", userId).maybeSingle();
     const result = existing
-      ? await supabase.from("professional_profiles").update(form).eq("user_id", userId)
-      : await supabase.from("professional_profiles").insert({ ...form, user_id: userId });
+      ? await supabase.from("professional_profiles").update(payload).eq("user_id", userId)
+      : await supabase.from("professional_profiles").insert({ ...payload, user_id: userId });
     if (result.error) { setError(result.error.message); setSaving(false); return; }
     setSaved(true); setSaving(false);
     setTimeout(() => setSaved(false), 3000);
@@ -133,6 +157,25 @@ export default function ProEditPage() {
               <label className="block text-xs uppercase tracking-wider text-[#3D2F2A] font-semibold mb-2">External booking link (optional)</label>
               <input type="url" value={form.external_booking_url} onChange={(e) => setForm({...form, external_booking_url: e.target.value})} placeholder="https://yourname.acuityscheduling.com" className="w-full px-4 py-3 rounded-xl bg-white border border-[#E8DCD0] outline-none focus:border-[#B8746E] text-[#2A2521]"/>
               <p className="text-xs text-[#6B5F58] mt-1">If you already use Acuity, Square, Fresha, or Calendly, paste your booking link here.</p>
+            </div>
+            <div>
+              <label className="block text-xs uppercase tracking-wider text-[#3D2F2A] font-semibold mb-2">When do your slots come out?</label>
+              <input type="text" value={form.slot_release_info} onChange={(e) => setForm({...form, slot_release_info: e.target.value})} placeholder="e.g. Sundays 8pm, 1st of every month, monthly on Instagram" className="w-full px-4 py-3 rounded-xl bg-white border border-[#E8DCD0] outline-none focus:border-[#B8746E] text-[#2A2521]"/>
+              <p className="text-xs text-[#6B5F58] mt-1">Let clients know when you release new booking availability.</p>
+            </div>
+            <div className="pt-4 border-t border-[#E8DCD0]">
+              <h2 className="font-serif text-2xl font-semibold text-[#2A2521] mb-1">Pro Highlights</h2>
+              <p className="text-sm text-[#6B5F58] mb-4">Show off your best work.</p>
+            </div>
+            <div>
+              <label className="block text-xs uppercase tracking-wider text-[#3D2F2A] font-semibold mb-2">Photo URLs (one per line)</label>
+              <textarea value={form.portfolio_images_text} onChange={(e) => setForm({...form, portfolio_images_text: e.target.value})} placeholder="https://example.com/photo1.jpg&#10;https://example.com/photo2.jpg" rows={5} className="w-full px-4 py-3 rounded-xl bg-white border border-[#E8DCD0] outline-none focus:border-[#B8746E] text-[#2A2521] resize-none font-mono text-sm"/>
+              <p className="text-xs text-[#6B5F58] mt-1">Paste photo URLs, one per line. You can right-click images on Instagram or your website and copy the image URL.</p>
+            </div>
+            <div>
+              <label className="block text-xs uppercase tracking-wider text-[#3D2F2A] font-semibold mb-2">Featured video URL (optional)</label>
+              <input type="url" value={form.featured_video_url} onChange={(e) => setForm({...form, featured_video_url: e.target.value})} placeholder="https://youtube.com/watch?v=..." className="w-full px-4 py-3 rounded-xl bg-white border border-[#E8DCD0] outline-none focus:border-[#B8746E] text-[#2A2521]"/>
+              <p className="text-xs text-[#6B5F58] mt-1">YouTube, TikTok, or Instagram video URL. Clients will see a link to watch.</p>
             </div>
             <div className="bg-white border border-[#E8DCD0] rounded-xl p-4 flex items-center justify-between">
               <div>

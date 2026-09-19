@@ -54,6 +54,21 @@ export default function AccountPage() {
             </span>.
           </p>
 
+          {profile.user_type === "client" && (
+            <div className="bg-[#F5EDE6] border border-[#DDB4B0] rounded-2xl p-6 mb-6">
+              <h3 className="font-serif text-2xl font-semibold text-[#2A2521] mb-2">Find a professional</h3>
+              <p className="text-sm text-[#3D2F2A] mb-5">
+                Browse Black beauty and grooming professionals across the UK. Filter by service, location, and more.
+              </p>
+              <Link
+                href="/pros"
+                className="inline-block bg-[#3D2F2A] text-white px-6 py-3 rounded-xl font-semibold text-sm hover:bg-[#5A4640] transition"
+              >
+                Browse professionals →
+              </Link>
+            </div>
+          )}
+
           <div className="bg-white border border-[#E8DCD0] rounded-2xl p-6 mb-6">
             <h2 className="font-serif text-2xl font-semibold text-[#2A2521] mb-4">Your account</h2>
             <dl className="space-y-3">

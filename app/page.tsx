@@ -1,6 +1,13 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WaitlistForm from "@/components/WaitlistForm";
+import {
+  ServicesSection,
+  HowItWorksSection,
+  ProfilesSection,
+  PlansSection,
+  AboutSection,
+} from "@/components/home/HomeSections";
 
 export default function Home() {
   return (
@@ -10,7 +17,7 @@ export default function Home() {
         <section className="bg-gradient-to-b from-[#F5EDE6] to-[#DDB4B0] py-20 md:py-28">
           <div className="max-w-3xl mx-auto px-6 text-center">
             <p className="text-xs uppercase tracking-[0.3em] text-[#6B5F58] mb-6 font-medium">
-              Launching summer 2026
+              Launching soon
             </p>
             <h1 className="font-serif text-5xl md:text-6xl font-semibold text-[#2A2521] leading-[1.05] mb-6">
               Find your <span className="text-[#B8746E] italic font-medium">maintenance</span> professional nearby.
@@ -21,6 +28,12 @@ export default function Home() {
             <WaitlistForm />
           </div>
         </section>
+
+        <ServicesSection />
+        <HowItWorksSection />
+        <ProfilesSection />
+        <PlansSection />
+        <AboutSection />
 
         <section className="py-20 bg-[#3D2F2A] text-white">
           <div className="max-w-2xl mx-auto px-6 text-center">

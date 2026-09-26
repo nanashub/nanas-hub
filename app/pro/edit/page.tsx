@@ -176,9 +176,9 @@ export default function ProEditPage() {
               </div>
             </div>
             <div>
-              <label className="block text-xs uppercase tracking-wider text-[#3D2F2A] font-semibold mb-2">External booking link (optional)</label>
+              <label className="block text-xs uppercase tracking-wider text-[#3D2F2A] font-semibold mb-2">Your booking link</label>
               <input type="url" value={form.external_booking_url} onChange={(e) => setForm({...form, external_booking_url: e.target.value})} placeholder="https://yourname.acuityscheduling.com" className="w-full px-4 py-3 rounded-xl bg-white border border-[#E8DCD0] outline-none focus:border-[#B8746E] text-[#2A2521]"/>
-              <p className="text-xs text-[#6B5F58] mt-1">If you already use Acuity, Square, Fresha, or Calendly, paste your booking link here.</p>
+              <p className="text-xs text-[#6B5F58] mt-1">Paste the link to your Acuity, Fresha, Booksy, Square or Calendly page. Clients will tap Book now and book with you there.</p>
             </div>
             <div>
               <label className="block text-xs uppercase tracking-wider text-[#3D2F2A] font-semibold mb-2">When do your slots come out?</label>

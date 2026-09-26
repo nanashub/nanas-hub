@@ -19,8 +19,8 @@ const steps = [
     body: "Filter by location and whether you want a salon or a mobile pro. Every pro has a profile with their work, prices and specialisms.",
   },
   {
-    title: "Request a booking",
-    body: "Pick a date and time that suits you and send your request. The pro confirms the price and time.",
+    title: "Book with them directly",
+    body: "Tap Book now to go straight to the pro's own booking page, like Acuity or Fresha, and pick a time that works for you.",
   },
   {
     title: "Leave a review",
@@ -132,10 +132,10 @@ export function PlansSection() {
           <div>
             <Eyebrow light>For beauty professionals</Eyebrow>
             <h2 className="font-serif text-4xl md:text-5xl font-semibold leading-[1.05]">
-              Get found by the clients looking for you
+              Let new clients find you
             </h2>
             <p className="text-white/80 mt-5 leading-relaxed max-w-md">
-              Set up a profile, show off your work, take booking requests and collect reviews. Mainstream booking apps
+              Set up a profile, show off your work, link your booking page and collect reviews. Mainstream booking apps
               weren&apos;t built with you in mind. This one is.
             </p>
             <Link
@@ -153,8 +153,7 @@ export function PlansSection() {
               </div>
               <ul className="mt-4 space-y-2 text-sm text-white/85">
                 <li>✦&nbsp;&nbsp;Professional profile and Pro Highlights</li>
-                <li>✦&nbsp;&nbsp;Booking requests from clients</li>
-                <li>✦&nbsp;&nbsp;Link to your own booking page</li>
+                                <li>✦&nbsp;&nbsp;Link to your Acuity, Fresha or Booksy page</li>
                 <li>✦&nbsp;&nbsp;Client reviews</li>
               </ul>
             </div>

@@ -160,11 +160,17 @@ export default function PublicProProfile({ params }: { params: Promise<{ id: str
             {profile.accepting_bookings && profile.external_booking_url && (
               <>
                 <a href={profile.external_booking_url} target="_blank" rel="noopener noreferrer" className={btnClass}>Book now</a>
-                <div><Link href={`/book/${profile.id}`} className="text-sm text-[#B8746E] hover:underline">Or request a custom date and time</Link></div>
+                <p className="text-xs text-[#6B5F58]">Opens {displayName}&apos;s booking page</p>
               </>
             )}
-            {profile.accepting_bookings && !profile.external_booking_url && (
-              <Link href={`/book/${profile.id}`} className={btnClass}>Request booking</Link>
+            {profile.accepting_bookings && !profile.external_booking_url && profile.instagram_handle && (
+              <>
+                <a href={`https://instagram.com/${profile.instagram_handle.replace(/^@/, "")}`} target="_blank" rel="noopener noreferrer" className={btnClass}>Message on Instagram</a>
+                <p className="text-xs text-[#6B5F58]">Online booking coming soon</p>
+              </>
+            )}
+            {profile.accepting_bookings && !profile.external_booking_url && !profile.instagram_handle && (
+              <div className="bg-[#F5EDE6] border border-[#DDB4B0] rounded-xl px-6 py-4 max-w-md mx-auto"><p className="text-[#6B5F58] text-sm">Booking link coming soon.</p></div>
             )}
           </section>
         </div>

@@ -6,7 +6,7 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase/client";
 import Header from "@/components/Header";
 import ServicesEditor from "@/components/pro/ServicesEditor";
-import { CATEGORIES, isCategory } from "@/lib/categories";
+import { CATEGORIES, OTHER, isCategory } from "@/lib/categories";
 
 type ProProfile = {
   business_name: string;
@@ -22,6 +22,7 @@ type ProProfile = {
   portfolio_images: string[];
   accepting_bookings: boolean;
   service_categories: string[];
+  other_category: string;
 };
 
 export default function ProEditPage() {
@@ -46,6 +47,7 @@ export default function ProEditPage() {
     portfolio_images: [],
     accepting_bookings: true,
     service_categories: [],
+    other_category: "",
   });
 
   useEffect(() => {
@@ -71,6 +73,7 @@ export default function ProEditPage() {
           portfolio_images: p.portfolio_images || [],
           accepting_bookings: p.accepting_bookings ?? true,
           service_categories: (p.service_categories || []).filter(isCategory),
+          other_category: p.other_category || "",
         });
       }
       setLoading(false);
@@ -130,11 +133,16 @@ export default function ProEditPage() {
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
     if (!userId) return;
+    if (form.service_categories.includes(OTHER) && !form.other_category.trim()) {
+      setError("You ticked Other. Please say what else you offer, or untick it.");
+      return;
+    }
     setSaving(true); setSaved(false); setError("");
+    const toSave = { ...form, other_category: form.service_categories.includes(OTHER) ? form.other_category.trim() : "" };
     const { data: existing } = await supabase.from("professional_profiles").select("id").eq("user_id", userId).maybeSingle();
     const result = existing
-      ? await supabase.from("professional_profiles").update(form).eq("user_id", userId)
-      : await supabase.from("professional_profiles").insert({ ...form, user_id: userId });
+      ? await supabase.from("professional_profiles").update(toSave).eq("user_id", userId)
+      : await supabase.from("professional_profiles").insert({ ...toSave, user_id: userId });
     if (result.error) { setError(result.error.message); setSaving(false); return; }
     setSaved(true); setSaving(false);
     setTimeout(() => setSaved(false), 3000);
@@ -173,6 +181,12 @@ export default function ProEditPage() {
                   );
                 })}
               </div>
+              {form.service_categories.includes(OTHER) && (
+                <div className="mt-3">
+                  <label htmlFor="other-category" className="block text-xs uppercase tracking-wider text-[#3D2F2A] font-semibold mb-2">What else do you offer?</label>
+                  <input id="other-category" type="text" maxLength={60} value={form.other_category} onChange={(e) => setForm({...form, other_category: e.target.value})} placeholder="e.g. Scalp treatments, hair colouring" className="w-full px-4 py-3 rounded-xl bg-white border border-[#E8DCD0] outline-none focus:border-[#B8746E] text-[#2A2521]"/>
+                </div>
+              )}
             </fieldset>
             <div>
               <label className="block text-xs uppercase tracking-wider text-[#3D2F2A] font-semibold mb-2">Years of experience</label>

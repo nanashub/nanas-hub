@@ -5,7 +5,7 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { CATEGORIES, categoryLabel, formatPrice, isCategory } from "@/lib/categories";
+import { CATEGORIES, categoryLabel, categoryTags, formatPrice, getCategory, isCategory, isStyle, styleLabel } from "@/lib/categories";
 
 type ProListing = {
   id: string;
@@ -18,6 +18,8 @@ type ProListing = {
   average_rating: number;
   total_reviews: number;
   categories: string[];
+  other_category: string | null;
+  styles: string[];
   from_pence: number | null;
 };
 
@@ -27,13 +29,26 @@ export default function SearchPage() {
   const [locationFilter, setLocationFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState<"all" | "mobile" | "salon">("all");
   const [categoryFilter, setCategoryFilter] = useState("");
+  const [styleFilter, setStyleFilter] = useState("");
+
+  function updateUrl(category: string, style: string) {
+    const url = new URL(window.location.href);
+    if (category) url.searchParams.set("category", category);
+    else url.searchParams.delete("category");
+    if (style) url.searchParams.set("style", style);
+    else url.searchParams.delete("style");
+    window.history.replaceState(null, "", url.toString());
+  }
 
   function chooseCategory(slug: string) {
     setCategoryFilter(slug);
-    const url = new URL(window.location.href);
-    if (slug) url.searchParams.set("category", slug);
-    else url.searchParams.delete("category");
-    window.history.replaceState(null, "", url.toString());
+    setStyleFilter("");
+    updateUrl(slug, "");
+  }
+
+  function chooseStyle(slug: string) {
+    setStyleFilter(slug);
+    updateUrl(categoryFilter, slug);
   }
 
   useEffect(() => {
@@ -41,13 +56,18 @@ export default function SearchPage() {
       setLoading(true);
       const { data: proProfiles } = await supabase.from("professional_profiles").select("*").eq("accepting_bookings", true);
       // Read ?category= from the link (for example from the homepage service buttons).
-      const fromUrl = new URLSearchParams(window.location.search).get("category");
-      if (isCategory(fromUrl)) setCategoryFilter(fromUrl);
+      const params = new URLSearchParams(window.location.search);
+      const fromUrl = params.get("category");
+      if (isCategory(fromUrl)) {
+        setCategoryFilter(fromUrl);
+        const styleFromUrl = params.get("style");
+        if (isStyle(fromUrl, styleFromUrl)) setStyleFilter(styleFromUrl);
+      }
       if (!proProfiles) { setLoading(false); return; }
       const userIds = proProfiles.map((p) => p.user_id);
       if (userIds.length === 0) { setPros([]); setLoading(false); return; }
       const { data: userProfiles } = await supabase.from("profiles").select("id, first_name, last_name, location_city").in("id", userIds);
-      const { data: services } = await supabase.from("services").select("professional_id, category, price_pence").in("professional_id", userIds);
+      const { data: services } = await supabase.from("services").select("professional_id, category, style, price_pence").in("professional_id", userIds);
       const merged: ProListing[] = proProfiles.map((p) => {
         const user = userProfiles?.find((u) => u.id === p.user_id);
         return {
@@ -64,6 +84,10 @@ export default function SearchPage() {
             ...((p.service_categories || []) as string[]),
             ...(services || []).filter((sv) => sv.professional_id === p.user_id).map((sv) => sv.category as string),
           ])).filter(isCategory),
+          other_category: p.other_category || null,
+          styles: (services || [])
+            .filter((sv) => sv.professional_id === p.user_id && sv.style)
+            .map((sv) => `${sv.category}/${sv.style}`),
           from_pence: (services || [])
             .filter((sv) => sv.professional_id === p.user_id && sv.price_pence != null)
             .reduce<number | null>((min, sv) => (min === null || sv.price_pence < min ? sv.price_pence : min), null),
@@ -85,6 +109,7 @@ export default function SearchPage() {
       if (typeFilter === "salon" && pro.location_type === "mobile") return false;
     }
     if (categoryFilter && !pro.categories.includes(categoryFilter)) return false;
+    if (categoryFilter && styleFilter && !pro.styles.includes(`${categoryFilter}/${styleFilter}`)) return false;
     return true;
   });
 
@@ -114,6 +139,17 @@ export default function SearchPage() {
                   ))}
                 </div>
               </div>
+              {(getCategory(categoryFilter)?.styles.length ?? 0) > 0 && (
+                <div>
+                  <label htmlFor="style-filter" className="sr-only">Style</label>
+                  <select id="style-filter" value={styleFilter} onChange={(e) => chooseStyle(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-[#F5EDE6] border border-[#E8DCD0] outline-none focus:border-[#B8746E] text-[#2A2521]">
+                    <option value="">Any {categoryLabel(categoryFilter).toLowerCase()} style</option>
+                    {getCategory(categoryFilter)?.styles.map((st) => (
+                      <option key={st.slug} value={st.slug}>{st.label}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
           </div>
         </section>
@@ -122,7 +158,7 @@ export default function SearchPage() {
             <p className="text-center text-[#6B5F58]">Loading pros...</p>
           ) : filtered.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-[#2A2521] font-serif text-xl mb-2">{categoryFilter ? `No ${categoryLabel(categoryFilter).toLowerCase()} pros yet` : "No professionals found"}</p>
+              <p className="text-[#2A2521] font-serif text-xl mb-2">{styleFilter ? `No pros offering ${styleLabel(categoryFilter, styleFilter).toLowerCase()} yet` : categoryFilter ? `No ${categoryLabel(categoryFilter).toLowerCase()} pros yet` : "No professionals found"}</p>
               <p className="text-sm text-[#6B5F58]">Try adjusting your filters, or check back soon as more pros join.</p>
             </div>
           ) : (
@@ -149,8 +185,8 @@ export default function SearchPage() {
                           </p>
                           {pro.categories.length > 0 && (
                             <div className="flex flex-wrap gap-1.5 mb-2">
-                              {pro.categories.map((c) => (
-                                <span key={c} className="text-[11px] px-2 py-0.5 rounded-full bg-[#F5EDE6] text-[#3D2F2A]">{categoryLabel(c)}</span>
+                              {categoryTags(pro.categories, pro.other_category).map((t) => (
+                                <span key={t.slug} className="text-[11px] px-2 py-0.5 rounded-full bg-[#F5EDE6] text-[#3D2F2A]">{t.label}</span>
                               ))}
                             </div>
                           )}

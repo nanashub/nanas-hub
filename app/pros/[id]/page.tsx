@@ -5,13 +5,14 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { categoryLabel, formatDuration, formatPrice, isCategory } from "@/lib/categories";
+import { OTHER, categoryLabel, categoryTags, formatDuration, formatPrice, isCategory, styleLabel } from "@/lib/categories";
 
 type Service = {
   id: string;
   name: string;
   description: string | null;
   category: string | null;
+  style: string | null;
   price_pence: number | null;
   duration_minutes: number | null;
 };
@@ -36,6 +37,7 @@ type ProfileWithPro = {
   average_rating: number;
   total_reviews: number;
   categories: string[];
+  other_category: string | null;
 };
 
 export default function PublicProProfile({ params }: { params: Promise<{ id: string }> }) {
@@ -53,7 +55,7 @@ export default function PublicProProfile({ params }: { params: Promise<{ id: str
       if (!p) { setNotFoundState(true); setLoading(false); return; }
       const { data: serviceRows } = await supabase
         .from("services")
-        .select("id, name, description, category, price_pence, duration_minutes")
+        .select("id, name, description, category, style, price_pence, duration_minutes")
         .eq("professional_id", id)
         .eq("is_active", true)
         .order("price_pence", { ascending: true });
@@ -81,6 +83,7 @@ export default function PublicProProfile({ params }: { params: Promise<{ id: str
           ...((p.service_categories || []) as string[]),
           ...(serviceRows || []).map((sv) => sv.category as string),
         ])).filter(isCategory),
+        other_category: p.other_category || null,
       });
       setLoading(false);
     }
@@ -114,9 +117,13 @@ export default function PublicProProfile({ params }: { params: Promise<{ id: str
                 {profile.location_city && <p className="text-[#3D2F2A] mt-2">{profile.location_city}</p>}
                 {profile.categories.length > 0 && (
                   <div className="flex flex-wrap gap-2 mt-3">
-                    {profile.categories.map((c) => (
-                      <Link key={c} href={`/pros?category=${c}`} className="text-xs px-3 py-1 rounded-full bg-white/70 text-[#3D2F2A] hover:bg-white transition">{categoryLabel(c)}</Link>
-                    ))}
+                    {categoryTags(profile.categories, profile.other_category).map((t) =>
+                      t.slug === OTHER ? (
+                        <span key={t.slug} className="text-xs px-3 py-1 rounded-full bg-white/70 text-[#3D2F2A]">{t.label}</span>
+                      ) : (
+                        <Link key={t.slug} href={`/pros?category=${t.slug}`} className="text-xs px-3 py-1 rounded-full bg-white/70 text-[#3D2F2A] hover:bg-white transition">{t.label}</Link>
+                      )
+                    )}
                   </div>
                 )}
               </div>
@@ -145,7 +152,7 @@ export default function PublicProProfile({ params }: { params: Promise<{ id: str
                     <div className="min-w-0">
                       <p className="font-semibold text-[#2A2521]">{sv.name}</p>
                       <p className="text-xs text-[#6B5F58] mt-0.5">
-                        {[categoryLabel(sv.category), formatDuration(sv.duration_minutes)].filter(Boolean).join(" · ")}
+                        {[sv.category === OTHER ? "" : categoryLabel(sv.category), styleLabel(sv.category, sv.style), formatDuration(sv.duration_minutes)].filter(Boolean).join(" · ")}
                       </p>
                       {sv.description && <p className="text-sm text-[#3D2F2A] mt-1">{sv.description}</p>}
                     </div>

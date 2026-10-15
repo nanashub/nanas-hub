@@ -46,6 +46,7 @@ Last updated: 15 October 2026
 - [ ] Repurpose the pro dashboard around the new model (profile views, Book now clicks, reviews)
 - [x] Category filter on Browse pros; homepage category buttons go to matching pros (categories live in `lib/categories.ts`)
 - [x] Services and prices in the pro profile editor and on profile pages
+- [x] Categories split into 12 groups (e.g. Single plait styles, Cornrows, Lashes, Brows) with a style dropdown, plus Other with the pro's own description (`supabase/2026-10-15-category-styles.sql`)
 - [x] "Delete my account" on the account page (`supabase/2026-10-15-services-and-account-deletion.sql`)
 - [ ] Write a privacy policy and terms (needed under UK GDPR before launch)
 - [ ] Ask pros for a booking link or Instagram handle when they set up their profile

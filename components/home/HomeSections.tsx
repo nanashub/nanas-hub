@@ -1,6 +1,6 @@
 import Link from "next/link";
 import FeaturedPros from "./FeaturedPros";
-import { CATEGORIES } from "@/lib/categories";
+import { CATEGORIES, OTHER } from "@/lib/categories";
 
 const steps = [
   {
@@ -59,7 +59,7 @@ export function ServicesSection() {
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
-          {CATEGORIES.map((c) => (
+          {CATEGORIES.filter((c) => c.slug !== OTHER).map((c) => (
             <Link
               key={c.slug}
               href={`/pros?category=${c.slug}`}

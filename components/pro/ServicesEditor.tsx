@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase/client";
-import { CATEGORIES, categoryLabel, formatDuration, formatPrice, isCategory } from "@/lib/categories";
+import { CATEGORIES, OTHER, categoryLabel, formatDuration, formatPrice, getCategory, isCategory, isStyle, styleLabel } from "@/lib/categories";
 
 type Service = {
   id: string;
   name: string;
   description: string | null;
   category: string | null;
+  style: string | null;
   price_pence: number | null;
   duration_minutes: number | null;
 };
@@ -17,12 +18,13 @@ type Draft = {
   name: string;
   description: string;
   category: string;
+  style: string;
   price: string;
   hours: string;
   minutes: string;
 };
 
-const emptyDraft: Draft = { name: "", description: "", category: "", price: "", hours: "", minutes: "" };
+const emptyDraft: Draft = { name: "", description: "", category: "", style: "", price: "", hours: "", minutes: "" };
 
 const inputClass =
   "w-full px-4 py-3 rounded-xl bg-white border border-[#E8DCD0] outline-none focus:border-[#B8746E] text-[#2A2521]";
@@ -52,7 +54,7 @@ export default function ServicesEditor({
     async function load() {
       const { data } = await supabase
         .from("services")
-        .select("id, name, description, category, price_pence, duration_minutes")
+        .select("id, name, description, category, style, price_pence, duration_minutes")
         .eq("professional_id", userId)
         .order("created_at", { ascending: true });
       setServices(data || []);
@@ -73,6 +75,7 @@ export default function ServicesEditor({
       name: s.name,
       description: s.description || "",
       category: isCategory(s.category) ? s.category : "",
+      style: isStyle(s.category, s.style) ? s.style : "",
       price: s.price_pence != null ? String(s.price_pence / 100) : "",
       hours: s.duration_minutes ? String(Math.floor(s.duration_minutes / 60)) : "",
       minutes: s.duration_minutes ? String(s.duration_minutes % 60) : "",
@@ -95,6 +98,7 @@ export default function ServicesEditor({
     const duration = (parseInt(draft.hours) || 0) * 60 + (parseInt(draft.minutes) || 0);
     if (!name) return setError("Add a name for the service, for example Knotless braids, mid-back.");
     if (!draft.category) return setError("Pick a category for this service.");
+    if (draft.category === OTHER && !name) return setError("Describe what this service is in the name box.");
     if (!draft.price || isNaN(price) || price < 0) return setError("Add a starting price in pounds, for example 85.");
 
     setBusy(true);
@@ -103,15 +107,16 @@ export default function ServicesEditor({
       name,
       description: draft.description.trim() || null,
       category: draft.category,
+      style: isStyle(draft.category, draft.style) ? draft.style : null,
       price_pence: Math.round(price * 100),
       duration_minutes: duration || null,
     };
     const result = editingId
-      ? await supabase.from("services").update(row).eq("id", editingId).select("id, name, description, category, price_pence, duration_minutes").single()
+      ? await supabase.from("services").update(row).eq("id", editingId).select("id, name, description, category, style, price_pence, duration_minutes").single()
       : await supabase
           .from("services")
           .insert({ ...row, professional_id: userId, is_active: true })
-          .select("id, name, description, category, price_pence, duration_minutes")
+          .select("id, name, description, category, style, price_pence, duration_minutes")
           .single();
     setBusy(false);
     if (result.error || !result.data) {
@@ -153,7 +158,7 @@ export default function ServicesEditor({
               <div className="min-w-0">
                 <p className="font-semibold text-[#2A2521]">{s.name}</p>
                 <p className="text-xs text-[#6B5F58] mt-0.5">
-                  {[categoryLabel(s.category), formatDuration(s.duration_minutes)].filter(Boolean).join(" · ")}
+                  {[categoryLabel(s.category), styleLabel(s.category, s.style), formatDuration(s.duration_minutes)].filter(Boolean).join(" · ")}
                 </p>
               </div>
               <div className="flex items-center gap-3 shrink-0">
@@ -179,13 +184,28 @@ export default function ServicesEditor({
           </div>
           <div>
             <label htmlFor="svc-category" className={labelClass}>Category</label>
-            <select id="svc-category" value={draft.category} onChange={(e) => setDraft({ ...draft, category: e.target.value })} className={inputClass}>
+            <select id="svc-category" value={draft.category} onChange={(e) => setDraft({ ...draft, category: e.target.value, style: "" })} className={inputClass}>
               <option value="">Choose a category</option>
               {CATEGORIES.map((c) => (
                 <option key={c.slug} value={c.slug}>{c.label}</option>
               ))}
             </select>
           </div>
+          {(getCategory(draft.category)?.styles.length ?? 0) > 0 && (
+            <div>
+              <label htmlFor="svc-style" className={labelClass}>Style</label>
+              <select id="svc-style" value={draft.style} onChange={(e) => setDraft({ ...draft, style: e.target.value })} className={inputClass}>
+                <option value="">Choose a style (optional)</option>
+                {getCategory(draft.category)?.styles.map((st) => (
+                  <option key={st.slug} value={st.slug}>{st.label}</option>
+                ))}
+              </select>
+              <p className="text-xs text-[#6B5F58] mt-1">Clients can filter by style, so picking one helps them find you.</p>
+            </div>
+          )}
+          {draft.category === OTHER && (
+            <p className="text-xs text-[#6B5F58] -mt-2">Use the service name to say exactly what it is, for example &quot;Scalp massage&quot;.</p>
+          )}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label htmlFor="svc-price" className={labelClass}>Price from (£)</label>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { CATEGORIES, categoryLabel, formatPrice, isCategory } from "@/lib/categories";
 
 type ProListing = {
   id: string;
@@ -16,6 +17,8 @@ type ProListing = {
   location_type: string;
   average_rating: number;
   total_reviews: number;
+  categories: string[];
+  from_pence: number | null;
 };
 
 export default function SearchPage() {
@@ -23,15 +26,28 @@ export default function SearchPage() {
   const [loading, setLoading] = useState(true);
   const [locationFilter, setLocationFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState<"all" | "mobile" | "salon">("all");
+  const [categoryFilter, setCategoryFilter] = useState("");
+
+  function chooseCategory(slug: string) {
+    setCategoryFilter(slug);
+    const url = new URL(window.location.href);
+    if (slug) url.searchParams.set("category", slug);
+    else url.searchParams.delete("category");
+    window.history.replaceState(null, "", url.toString());
+  }
 
   useEffect(() => {
     async function loadPros() {
       setLoading(true);
       const { data: proProfiles } = await supabase.from("professional_profiles").select("*").eq("accepting_bookings", true);
+      // Read ?category= from the link (for example from the homepage service buttons).
+      const fromUrl = new URLSearchParams(window.location.search).get("category");
+      if (isCategory(fromUrl)) setCategoryFilter(fromUrl);
       if (!proProfiles) { setLoading(false); return; }
       const userIds = proProfiles.map((p) => p.user_id);
       if (userIds.length === 0) { setPros([]); setLoading(false); return; }
       const { data: userProfiles } = await supabase.from("profiles").select("id, first_name, last_name, location_city").in("id", userIds);
+      const { data: services } = await supabase.from("services").select("professional_id, category, price_pence").in("professional_id", userIds);
       const merged: ProListing[] = proProfiles.map((p) => {
         const user = userProfiles?.find((u) => u.id === p.user_id);
         return {
@@ -44,6 +60,13 @@ export default function SearchPage() {
           location_type: p.location_type || "mobile",
           average_rating: p.average_rating || 0,
           total_reviews: p.total_reviews || 0,
+          categories: Array.from(new Set([
+            ...((p.service_categories || []) as string[]),
+            ...(services || []).filter((sv) => sv.professional_id === p.user_id).map((sv) => sv.category as string),
+          ])).filter(isCategory),
+          from_pence: (services || [])
+            .filter((sv) => sv.professional_id === p.user_id && sv.price_pence != null)
+            .reduce<number | null>((min, sv) => (min === null || sv.price_pence < min ? sv.price_pence : min), null),
         };
       });
       setPros(merged);
@@ -61,6 +84,7 @@ export default function SearchPage() {
       if (typeFilter === "mobile" && pro.location_type === "salon") return false;
       if (typeFilter === "salon" && pro.location_type === "mobile") return false;
     }
+    if (categoryFilter && !pro.categories.includes(categoryFilter)) return false;
     return true;
   });
 
@@ -81,6 +105,15 @@ export default function SearchPage() {
                   </button>
                 ))}
               </div>
+              <div className="-mx-4 px-4 overflow-x-auto">
+                <div className="flex gap-2 w-max pb-1">
+                  {[{ slug: "", label: "All services" }, ...CATEGORIES].map((c) => (
+                    <button key={c.slug || "all"} type="button" aria-pressed={categoryFilter === c.slug} onClick={() => chooseCategory(c.slug)} className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition border ${categoryFilter === c.slug ? "bg-[#3D2F2A] text-white border-[#3D2F2A]" : "bg-white text-[#3D2F2A] border-[#E8DCD0] hover:border-[#3D2F2A]"}`}>
+                      {c.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -89,7 +122,7 @@ export default function SearchPage() {
             <p className="text-center text-[#6B5F58]">Loading pros...</p>
           ) : filtered.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-[#2A2521] font-serif text-xl mb-2">No professionals found</p>
+              <p className="text-[#2A2521] font-serif text-xl mb-2">{categoryFilter ? `No ${categoryLabel(categoryFilter).toLowerCase()} pros yet` : "No professionals found"}</p>
               <p className="text-sm text-[#6B5F58]">Try adjusting your filters, or check back soon as more pros join.</p>
             </div>
           ) : (
@@ -114,11 +147,21 @@ export default function SearchPage() {
                             {pro.location_type === "salon" && "Salon"}
                             {pro.location_type === "either" && "Mobile and salon"}
                           </p>
+                          {pro.categories.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 mb-2">
+                              {pro.categories.map((c) => (
+                                <span key={c} className="text-[11px] px-2 py-0.5 rounded-full bg-[#F5EDE6] text-[#3D2F2A]">{categoryLabel(c)}</span>
+                              ))}
+                            </div>
+                          )}
                           {pro.bio && <p className="text-sm text-[#3D2F2A] line-clamp-2">{pro.bio}</p>}
                           <div className="flex items-center gap-3 mt-2 text-xs">
                             <span className="text-[#B8746E] font-semibold">
                               {pro.average_rating > 0 ? `${pro.average_rating.toFixed(1)} stars` : "New"}
                             </span>
+                            {pro.from_pence !== null && (
+                              <span className="text-[#2A2521] font-semibold">From {formatPrice(pro.from_pence)}</span>
+                            )}
                             {pro.total_reviews > 0 && (
                               <span className="text-[#6B5F58]">{pro.total_reviews} {pro.total_reviews === 1 ? "review" : "reviews"}</span>
                             )}

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase/client";
 import Header from "@/components/Header";
+import DeleteAccount from "@/components/DeleteAccount";
 
 type Profile = {
   id: string;
@@ -120,6 +121,10 @@ export default function AccountPage() {
           <button onClick={handleLogout} className="text-sm text-[#B8746E] hover:underline font-semibold">
             Log out
           </button>
+
+          <div className="mt-12 pt-6 border-t border-[#E8DCD0]">
+            <DeleteAccount userId={profile.id} isPro={profile.user_type === "pro"} />
+          </div>
         </div>
       </main>
     </>

@@ -9,7 +9,7 @@ The step-by-step build plan for Nana's Hub. It lives here, with the code, so it 
 - After changing this file, commit and push it like any other change (`git add .`, `git commit -m "Update roadmap"`, `git push`).
 - When working with Claude, say "read ROADMAP.md first" (Claude Code does this automatically via `CLAUDE.md`).
 
-Last updated: 26 September 2026
+Last updated: 15 October 2026
 
 ---
 
@@ -40,18 +40,21 @@ Last updated: 26 September 2026
 ## Phase 2: Tidy up before inviting pros
 
 - [ ] Check `RESEND_API_KEY` is set in Vercel (Settings → Environment Variables)
-- [ ] Turn on and check Row Level Security in Supabase for every table, so people can only edit their own profile and data (code done; run `supabase/2026-10-15-security-fixes.sql` in the Supabase SQL Editor after the code is live)
-- [ ] Phase 3: lock down reviews so clients can't change who a review is for, and pros can't hide reviews
+- [x] Row Level Security on for every table; emails, phones and postcodes hidden; pros can't edit their own ratings, verified badge or plan (`supabase/2026-10-15-security-fixes.sql`)
+- [x] Fixed photo uploads (created the lowercase `portfolio` bucket, deleted the old `Portfolio` one)
 - [ ] Decide what to do with the old booking request flow (`/book/[id]` page, bookings table, dashboard requests): remove it, or keep it for later
 - [ ] Repurpose the pro dashboard around the new model (profile views, Book now clicks, reviews)
-- [ ] Add a service/category filter to Browse pros, so the homepage category buttons (Braids, Locs, Lashes and so on) take clients to matching pros
-- [ ] Add a "services and prices" section to the pro profile editor and profile page
+- [x] Category filter on Browse pros; homepage category buttons go to matching pros (categories live in `lib/categories.ts`)
+- [x] Services and prices in the pro profile editor and on profile pages
+- [x] "Delete my account" on the account page (`supabase/2026-10-15-services-and-account-deletion.sql`)
+- [ ] Write a privacy policy and terms (needed under UK GDPR before launch)
 - [ ] Ask pros for a booking link or Instagram handle when they set up their profile
 - [ ] Test everything on a phone: sign up, edit profile, browse, Book now
 
 ## Phase 3: Reviews and trust
 
-- [ ] Create a `reviews` table in Supabase (pro, client, star rating, comment, date)
+- [x] `reviews` table exists in Supabase (it currently requires a completed booking, which needs rethinking now that bookings happen on pros' own sites)
+- [ ] Lock down reviews so clients can't change who a review is for, and pros can't hide reviews
 - [ ] Let logged-in clients leave a review on a pro's profile
 - [ ] Show reviews on the profile and update the average rating and review count
 - [ ] Decide how to stop fake reviews (for example, one review per client per pro, and pros can report a review)

@@ -1,17 +1,6 @@
 import Link from "next/link";
 import FeaturedPros from "./FeaturedPros";
-
-const categories = [
-  "Braids & twists",
-  "Locs",
-  "Silk press & natural hair",
-  "Wigs & installs",
-  "Barbering",
-  "Lashes & brows",
-  "Makeup",
-  "Skin & aesthetics",
-  "Nails",
-];
+import { CATEGORIES } from "@/lib/categories";
 
 const steps = [
   {
@@ -70,13 +59,13 @@ export function ServicesSection() {
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
-          {categories.map((c) => (
+          {CATEGORIES.map((c) => (
             <Link
-              key={c}
-              href="/pros"
+              key={c.slug}
+              href={`/pros?category=${c.slug}`}
               className="border border-[#E8DCD0] bg-white/60 rounded-full px-5 py-2.5 text-sm text-[#2A2521] hover:border-[#3D2F2A] hover:bg-white transition"
             >
-              {c}
+              {c.label}
             </Link>
           ))}
         </div>

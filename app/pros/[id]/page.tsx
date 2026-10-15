@@ -5,6 +5,16 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { categoryLabel, formatDuration, formatPrice, isCategory } from "@/lib/categories";
+
+type Service = {
+  id: string;
+  name: string;
+  description: string | null;
+  category: string | null;
+  price_pence: number | null;
+  duration_minutes: number | null;
+};
 
 type ProfileWithPro = {
   id: string;
@@ -25,6 +35,7 @@ type ProfileWithPro = {
   accepting_bookings: boolean;
   average_rating: number;
   total_reviews: number;
+  categories: string[];
 };
 
 export default function PublicProProfile({ params }: { params: Promise<{ id: string }> }) {
@@ -32,6 +43,7 @@ export default function PublicProProfile({ params }: { params: Promise<{ id: str
   const [profile, setProfile] = useState<ProfileWithPro | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFoundState, setNotFoundState] = useState(false);
+  const [services, setServices] = useState<Service[]>([]);
 
   useEffect(() => {
     async function loadProfile() {
@@ -39,6 +51,13 @@ export default function PublicProProfile({ params }: { params: Promise<{ id: str
       if (!userProfile || userProfile.user_type !== "pro") { setNotFoundState(true); setLoading(false); return; }
       const { data: p } = await supabase.from("professional_profiles").select("*").eq("user_id", id).maybeSingle();
       if (!p) { setNotFoundState(true); setLoading(false); return; }
+      const { data: serviceRows } = await supabase
+        .from("services")
+        .select("id, name, description, category, price_pence, duration_minutes")
+        .eq("professional_id", id)
+        .eq("is_active", true)
+        .order("price_pence", { ascending: true });
+      setServices(serviceRows || []);
       setProfile({
         id: userProfile.id,
         first_name: userProfile.first_name,
@@ -58,6 +77,10 @@ export default function PublicProProfile({ params }: { params: Promise<{ id: str
         accepting_bookings: p.accepting_bookings,
         average_rating: p.average_rating || 0,
         total_reviews: p.total_reviews || 0,
+        categories: Array.from(new Set([
+          ...((p.service_categories || []) as string[]),
+          ...(serviceRows || []).map((sv) => sv.category as string),
+        ])).filter(isCategory),
       });
       setLoading(false);
     }
@@ -89,6 +112,13 @@ export default function PublicProProfile({ params }: { params: Promise<{ id: str
                 <h1 className="font-serif text-4xl md:text-5xl font-semibold text-[#2A2521] mb-1">{displayName}</h1>
                 {profile.instagram_handle && <p className="text-[#6B5F58] text-sm">@{profile.instagram_handle}</p>}
                 {profile.location_city && <p className="text-[#3D2F2A] mt-2">{profile.location_city}</p>}
+                {profile.categories.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {profile.categories.map((c) => (
+                      <Link key={c} href={`/pros?category=${c}`} className="text-xs px-3 py-1 rounded-full bg-white/70 text-[#3D2F2A] hover:bg-white transition">{categoryLabel(c)}</Link>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -105,6 +135,30 @@ export default function PublicProProfile({ params }: { params: Promise<{ id: str
             <h2 className="text-xs uppercase tracking-widest text-[#B8746E] font-semibold mb-3">About</h2>
             <p className="text-[#2A2521] leading-relaxed">{profile.bio || "No bio provided yet."}</p>
           </section>
+
+          {services.length > 0 && (
+            <section>
+              <h2 className="text-xs uppercase tracking-widest text-[#B8746E] font-semibold mb-3">Services &amp; prices</h2>
+              <ul className="bg-white border border-[#E8DCD0] rounded-2xl divide-y divide-[#E8DCD0]">
+                {services.map((sv) => (
+                  <li key={sv.id} className="flex items-start justify-between gap-4 px-5 py-4">
+                    <div className="min-w-0">
+                      <p className="font-semibold text-[#2A2521]">{sv.name}</p>
+                      <p className="text-xs text-[#6B5F58] mt-0.5">
+                        {[categoryLabel(sv.category), formatDuration(sv.duration_minutes)].filter(Boolean).join(" · ")}
+                      </p>
+                      {sv.description && <p className="text-sm text-[#3D2F2A] mt-1">{sv.description}</p>}
+                    </div>
+                    <p className="shrink-0 text-right tabular-nums">
+                      <span className="block text-[11px] uppercase tracking-wider text-[#6B5F58]">from</span>
+                      <span className="font-serif text-xl font-semibold text-[#2A2521]">{formatPrice(sv.price_pence)}</span>
+                    </p>
+                  </li>
+                ))}
+              </ul>
+              <p className="text-xs text-[#6B5F58] mt-2">Prices are a guide. Final prices are confirmed when you book.</p>
+            </section>
+          )}
 
           {profile.portfolio_images.length > 0 && (
             <section>

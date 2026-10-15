@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase/client";
 import Header from "@/components/Header";
+import ServicesEditor from "@/components/pro/ServicesEditor";
+import { CATEGORIES, isCategory } from "@/lib/categories";
 
 type ProProfile = {
   business_name: string;
@@ -19,6 +21,7 @@ type ProProfile = {
   featured_video_url: string;
   portfolio_images: string[];
   accepting_bookings: boolean;
+  service_categories: string[];
 };
 
 export default function ProEditPage() {
@@ -42,6 +45,7 @@ export default function ProEditPage() {
     featured_video_url: "",
     portfolio_images: [],
     accepting_bookings: true,
+    service_categories: [],
   });
 
   useEffect(() => {
@@ -66,6 +70,7 @@ export default function ProEditPage() {
           featured_video_url: p.featured_video_url || "",
           portfolio_images: p.portfolio_images || [],
           accepting_bookings: p.accepting_bookings ?? true,
+          service_categories: (p.service_categories || []).filter(isCategory),
         });
       }
       setLoading(false);
@@ -105,6 +110,19 @@ export default function ProEditPage() {
     e.target.value = "";
   }
 
+  function toggleCategory(slug: string) {
+    setForm(prev => ({
+      ...prev,
+      service_categories: prev.service_categories.includes(slug)
+        ? prev.service_categories.filter(c => c !== slug)
+        : [...prev.service_categories, slug],
+    }));
+  }
+
+  function addCategory(slug: string) {
+    setForm(prev => prev.service_categories.includes(slug) ? prev : { ...prev, service_categories: [...prev.service_categories, slug] });
+  }
+
   function removeImage(index: number) {
     setForm(prev => ({ ...prev, portfolio_images: prev.portfolio_images.filter((_, i) => i !== index) }));
   }
@@ -142,6 +160,20 @@ export default function ProEditPage() {
               <textarea value={form.bio} onChange={(e) => setForm({...form, bio: e.target.value})} placeholder="Tell clients about your specialties, training, what makes your work different..." rows={5} maxLength={500} className="w-full px-4 py-3 rounded-xl bg-white border border-[#E8DCD0] outline-none focus:border-[#B8746E] text-[#2A2521] resize-none"/>
               <p className="text-xs text-[#6B5F58] mt-1">{form.bio.length} / 500 characters</p>
             </div>
+            <fieldset>
+              <legend className="block text-xs uppercase tracking-wider text-[#3D2F2A] font-semibold mb-2">What do you do?</legend>
+              <p className="text-xs text-[#6B5F58] mb-3">Pick everything that applies. Clients filter by these on Browse pros.</p>
+              <div className="flex flex-wrap gap-2">
+                {CATEGORIES.map((c) => {
+                  const on = form.service_categories.includes(c.slug);
+                  return (
+                    <button key={c.slug} type="button" aria-pressed={on} onClick={() => toggleCategory(c.slug)} className={`px-4 py-2 rounded-full text-sm transition border ${on ? "bg-[#3D2F2A] text-white border-[#3D2F2A]" : "bg-white/60 text-[#3D2F2A] border-[#E8DCD0] hover:border-[#3D2F2A]"}`}>
+                      {on ? "✓ " : ""}{c.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </fieldset>
             <div>
               <label className="block text-xs uppercase tracking-wider text-[#3D2F2A] font-semibold mb-2">Years of experience</label>
               <input type="number" min="0" value={form.years_experience} onChange={(e) => setForm({...form, years_experience: parseInt(e.target.value) || 0})} className="w-full px-4 py-3 rounded-xl bg-white border border-[#E8DCD0] outline-none focus:border-[#B8746E] text-[#2A2521]"/>
@@ -185,6 +217,7 @@ export default function ProEditPage() {
               <input type="text" value={form.slot_release_info} onChange={(e) => setForm({...form, slot_release_info: e.target.value})} placeholder="e.g. Sundays 8pm, 1st of every month" className="w-full px-4 py-3 rounded-xl bg-white border border-[#E8DCD0] outline-none focus:border-[#B8746E] text-[#2A2521]"/>
               <p className="text-xs text-[#6B5F58] mt-1">Let clients know when you release new booking availability.</p>
             </div>
+            {userId && <ServicesEditor userId={userId} onCategoryUsed={addCategory} />}
             <div className="pt-4 border-t border-[#E8DCD0]">
               <h2 className="font-serif text-2xl font-semibold text-[#2A2521] mb-1">Pro Highlights</h2>
               <p className="text-sm text-[#6B5F58] mb-4">Show off your best work.</p>

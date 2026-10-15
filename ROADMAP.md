@@ -39,21 +39,21 @@ Last updated: 15 October 2026
 
 ## Phase 2: Tidy up before inviting pros
 
-- [ ] Check `RESEND_API_KEY` is set in Vercel (Settings → Environment Variables)
 - [x] Row Level Security on for every table; emails, phones and postcodes hidden; pros can't edit their own ratings, verified badge or plan (`supabase/2026-10-15-security-fixes.sql`)
 - [x] Fixed photo uploads (created the lowercase `portfolio` bucket, deleted the old `Portfolio` one)
-- [ ] Decide what to do with the old booking request flow (`/book/[id]` page, bookings table, dashboard requests): remove it, or keep it for later
-- [ ] Repurpose the pro dashboard around the new model (profile views, Book now clicks, reviews)
+- [x] Removed the old booking request page and booking emails (the `bookings` table is kept, unused)
+- [x] New pro dashboard: profile checklist and share link (free for all pros)
+- [x] Town or city field in the pro editor (Browse pros city search now works)
 - [x] Category filter on Browse pros; homepage category buttons go to matching pros (categories live in `lib/categories.ts`)
 - [x] Services and prices in the pro profile editor and on profile pages
 - [x] Categories split into 12 groups (e.g. Single plait styles, Cornrows, Lashes, Brows) with a style dropdown, plus Other with the pro's own description (`supabase/2026-10-15-category-styles.sql`)
 - [x] "Delete my account" on the account page (`supabase/2026-10-15-services-and-account-deletion.sql`)
 - [x] Daily keep-alive so the free Supabase project doesn't pause (`app/api/keep-alive/route.ts`, scheduled in `vercel.json`)
 - [x] Privacy Policy (`/privacy`) and Terms of Use (`/terms`), linked from the footer, sign-up (with age checkbox: clients 16+, pros 18+) and waitlist
-- [ ] Set up the hello@nanashub.co.uk email (Zoho Mail free plan, or Namecheap forwarding) - the policies already use this address
+- [ ] Set up the hello@nanashub.co.uk email (Zoho Mail Lite, leave the VAT field blank) - the policies already use this address
 - [ ] Do the ICO's free self-assessment at ico.org.uk and pay the data protection fee if needed (about £52 a year, £47 by Direct Debit)
 - [ ] Get the Privacy Policy and Terms checked (for example by a free small-business legal clinic) before growing
-- [ ] Ask pros for a booking link or Instagram handle when they set up their profile
+- [x] Pros must add a booking link or Instagram before taking bookings
 - [ ] Test everything on a phone: sign up, edit profile, browse, Book now
 
 ## Phase 3: Reviews and trust
@@ -86,6 +86,7 @@ Last updated: 15 October 2026
 
 - [ ] Build Pro plan (£10/month) with Stripe subscriptions
 - [ ] Decide what Pro includes: analytics, boosted visibility, promotions, client tools
+- [ ] Pro stats: track profile views and Book now / Instagram clicks (no personal data), show them on the dashboard for Pro pros, and update the Privacy Policy. Start tracking before Pro launches so there's data to show
 - [ ] Review revenue streams from the business plan: commission per booking is hard when bookings happen on the pro's own site, so focus on subscriptions, featured listings and in-app advertising
 
 ## Later

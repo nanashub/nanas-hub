@@ -91,9 +91,9 @@ export default function AccountPage() {
           {profile.user_type === "pro" && (
             <>
               <div className="bg-[#F5EDE6] border border-[#DDB4B0] rounded-2xl p-6 mb-4">
-                <h3 className="font-serif text-2xl font-semibold text-[#2A2521] mb-2">Bookings dashboard</h3>
+                <h3 className="font-serif text-2xl font-semibold text-[#2A2521] mb-2">Your dashboard</h3>
                 <p className="text-sm text-[#3D2F2A] mb-5">
-                  See your pending booking requests, accept or decline them, and track upcoming appointments.
+                  See what&apos;s left to finish on your profile, and get your link to share on Instagram.
                 </p>
                 <Link
                   href="/pro/dashboard"

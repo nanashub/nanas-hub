@@ -33,6 +33,7 @@ export default function ProEditPage() {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
   const [userId, setUserId] = useState<string | null>(null);
+  const [city, setCity] = useState("");
   const [form, setForm] = useState<ProProfile>({
     business_name: "",
     bio: "",
@@ -55,7 +56,8 @@ export default function ProEditPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { router.push("/login"); return; }
       setUserId(user.id);
-      const { data: profile } = await supabase.from("profiles").select("user_type").eq("id", user.id).single();
+      const { data: profile } = await supabase.from("profiles").select("user_type, location_city").eq("id", user.id).single();
+      setCity(profile?.location_city || "");
       if (profile?.user_type !== "pro") { router.push("/account"); return; }
       const { data: p } = await supabase.from("professional_profiles").select("*").eq("user_id", user.id).maybeSingle();
       if (p) {
@@ -137,8 +139,33 @@ export default function ProEditPage() {
       setError("You ticked Other. Please say what else you offer, or untick it.");
       return;
     }
+    if (!city.trim()) {
+      setError("Add your town or city so clients nearby can find you.");
+      return;
+    }
+    let bookingUrl = form.external_booking_url.trim();
+    if (bookingUrl && !/^https?:\/\//i.test(bookingUrl)) bookingUrl = `https://${bookingUrl}`;
+    if (bookingUrl) {
+      try { new URL(bookingUrl); } catch {
+        setError("That booking link doesn't look right. Copy it straight from your booking site, for example https://yourname.as.me");
+        return;
+      }
+    }
+    const instagram = form.instagram_handle.trim().replace(/^@/, "");
+    if (form.accepting_bookings && !bookingUrl && !instagram) {
+      setError("Add your booking link or your Instagram handle so clients can book you. Or turn off Accepting bookings.");
+      return;
+    }
     setSaving(true); setSaved(false); setError("");
-    const toSave = { ...form, other_category: form.service_categories.includes(OTHER) ? form.other_category.trim() : "" };
+    const toSave = {
+      ...form,
+      external_booking_url: bookingUrl,
+      instagram_handle: instagram,
+      other_category: form.service_categories.includes(OTHER) ? form.other_category.trim() : "",
+    };
+    setForm(toSave);
+    const { error: cityError } = await supabase.from("profiles").update({ location_city: city.trim() }).eq("id", userId);
+    if (cityError) { setError(cityError.message); setSaving(false); return; }
     const { data: existing } = await supabase.from("professional_profiles").select("id").eq("user_id", userId).maybeSingle();
     const result = existing
       ? await supabase.from("professional_profiles").update(toSave).eq("user_id", userId)
@@ -193,6 +220,11 @@ export default function ProEditPage() {
               <input type="number" min="0" value={form.years_experience} onChange={(e) => setForm({...form, years_experience: parseInt(e.target.value) || 0})} className="w-full px-4 py-3 rounded-xl bg-white border border-[#E8DCD0] outline-none focus:border-[#B8746E] text-[#2A2521]"/>
             </div>
             <div>
+              <label htmlFor="city" className="block text-xs uppercase tracking-wider text-[#3D2F2A] font-semibold mb-2">Town or city</label>
+              <input id="city" type="text" maxLength={60} value={city} onChange={(e) => setCity(e.target.value)} placeholder="e.g. Romford, Birmingham, Peckham" className="w-full px-4 py-3 rounded-xl bg-white border border-[#E8DCD0] outline-none focus:border-[#B8746E] text-[#2A2521]"/>
+              <p className="text-xs text-[#6B5F58] mt-1">Shown on your profile so clients can search by location. Don&apos;t include your full address here.</p>
+            </div>
+            <div>
               <label className="block text-xs uppercase tracking-wider text-[#3D2F2A] font-semibold mb-2">Where do you work?</label>
               <div className="grid grid-cols-3 gap-2">
                 {(["mobile", "salon", "either"] as const).map((opt) => (
@@ -215,7 +247,7 @@ export default function ProEditPage() {
               </div>
             )}
             <div>
-              <label className="block text-xs uppercase tracking-wider text-[#3D2F2A] font-semibold mb-2">Instagram handle (optional)</label>
+              <label className="block text-xs uppercase tracking-wider text-[#3D2F2A] font-semibold mb-2">Instagram handle</label>
               <div className="flex">
                 <span className="px-4 py-3 rounded-l-xl bg-[#F5EDE6] border border-r-0 border-[#E8DCD0] text-[#6B5F58]">@</span>
                 <input type="text" value={form.instagram_handle} onChange={(e) => setForm({...form, instagram_handle: e.target.value.replace("@", "")})} placeholder="amaglowhair" className="flex-1 px-4 py-3 rounded-r-xl bg-white border border-[#E8DCD0] outline-none focus:border-[#B8746E] text-[#2A2521]"/>
@@ -224,7 +256,7 @@ export default function ProEditPage() {
             <div>
               <label className="block text-xs uppercase tracking-wider text-[#3D2F2A] font-semibold mb-2">Your booking link</label>
               <input type="url" value={form.external_booking_url} onChange={(e) => setForm({...form, external_booking_url: e.target.value})} placeholder="https://yourname.acuityscheduling.com" className="w-full px-4 py-3 rounded-xl bg-white border border-[#E8DCD0] outline-none focus:border-[#B8746E] text-[#2A2521]"/>
-              <p className="text-xs text-[#6B5F58] mt-1">Paste the link to your Acuity, Fresha, Booksy, Square or Calendly page. Clients will tap Book now and book with you there.</p>
+              <p className="text-xs text-[#6B5F58] mt-1">Paste the link to your Acuity, Fresha, Booksy, Square or Calendly page. Clients will tap Book now and book with you there. If you don&apos;t have one yet, add your Instagram above and clients can message you.</p>
             </div>
             <div>
               <label className="block text-xs uppercase tracking-wider text-[#3D2F2A] font-semibold mb-2">When do your slots come out?</label>
@@ -270,7 +302,7 @@ export default function ProEditPage() {
             <div className="bg-white border border-[#E8DCD0] rounded-xl p-4 flex items-center justify-between">
               <div>
                 <p className="font-semibold text-[#2A2521]">Accepting bookings</p>
-                <p className="text-xs text-[#6B5F58] mt-1">Turn off to pause new requests temporarily.</p>
+                <p className="text-xs text-[#6B5F58] mt-1">Turn off to hide your booking button while you&apos;re fully booked.</p>
               </div>
               <button type="button" onClick={() => setForm({...form, accepting_bookings: !form.accepting_bookings})} className={`relative w-14 h-7 rounded-full transition ${form.accepting_bookings ? "bg-[#B8746E]" : "bg-[#E8DCD0]"}`}>
                 <span className={`absolute top-1 w-5 h-5 bg-white rounded-full transition ${form.accepting_bookings ? "left-8" : "left-1"}`}/>

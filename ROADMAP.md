@@ -48,6 +48,7 @@ Last updated: 15 October 2026
 - [x] Services and prices in the pro profile editor and on profile pages
 - [x] Categories split into 12 groups (e.g. Single plait styles, Cornrows, Lashes, Brows) with a style dropdown, plus Other with the pro's own description (`supabase/2026-10-15-category-styles.sql`)
 - [x] "Delete my account" on the account page (`supabase/2026-10-15-services-and-account-deletion.sql`)
+- [x] Daily keep-alive so the free Supabase project doesn't pause (`app/api/keep-alive/route.ts`, scheduled in `vercel.json`)
 - [ ] Write a privacy policy and terms (needed under UK GDPR before launch)
 - [ ] Ask pros for a booking link or Instagram handle when they set up their profile
 - [ ] Test everything on a phone: sign up, edit profile, browse, Book now
@@ -71,6 +72,7 @@ Last updated: 15 October 2026
 
 ## Phase 5: Launch to clients
 
+- [ ] Upgrade Supabase to Pro before launch (no pausing, daily backups)
 - [ ] Email the waitlist when there are enough pros in an area
 - [ ] Set up and post on Instagram and TikTok, featuring the first pros (business plan Goal 3)
 - [ ] Reach out to 2–3 micro-influencers

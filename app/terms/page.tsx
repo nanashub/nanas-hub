@@ -108,10 +108,15 @@ export default function TermsPage() {
           id: "reviews",
           heading: "Ratings and reviews",
           body: (
-            <p>
-              Reviews must be honest and based on a real experience. Pros must not write reviews of themselves, or pay or
-              pressure anyone for reviews. We may remove reviews that break these rules.
-            </p>
+            <>
+              <p>Any logged-in user can review a pro they&apos;ve had a treatment with. Each person can leave one review per pro, and can edit or delete it at any time. Pros can post one public reply to each review.</p>
+              <ul>
+                <li>Reviews must be honest, your own, and based on a real treatment.</li>
+                <li>Pros must not review themselves, or ask friends or family to, and must not pay, offer discounts for, or pressure anyone into leaving or changing a review.</li>
+                <li>Replies must be polite and must not share a client&apos;s personal details.</li>
+              </ul>
+              <p>We may hide or remove reviews or replies that break these rules. To report one, email {email}.</p>
+            </>
           ),
         },
         {

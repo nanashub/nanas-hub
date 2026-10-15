@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase/client";
 import Header from "@/components/Header";
+import ReplyToReviews from "@/components/reviews/ReplyToReviews";
 
 type ProProfile = {
   business_name: string | null;
@@ -203,6 +204,8 @@ export default function ProDashboard() {
                   View my profile as clients see it →
                 </Link>
               </section>
+
+              <ReplyToReviews proId={userId} />
             </>
           )}
 

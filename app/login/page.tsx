@@ -29,7 +29,10 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/account");
+    // Go back to where they came from (e.g. a pro's profile to leave a review).
+    const next = new URLSearchParams(window.location.search).get("next");
+    const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : "/account";
+    router.push(safeNext);
     router.refresh();
   }
 

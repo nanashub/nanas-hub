@@ -58,12 +58,13 @@ Last updated: 15 October 2026
 
 ## Phase 3: Reviews and trust
 
-- [x] `reviews` table exists in Supabase (it currently requires a completed booking, which needs rethinking now that bookings happen on pros' own sites)
-- [ ] Lock down reviews so clients can't change who a review is for, and pros can't hide reviews
-- [ ] Let logged-in clients leave a review on a pro's profile
-- [ ] Show reviews on the profile and update the average rating and review count
-- [ ] Decide how to stop fake reviews (for example, one review per client per pro, and pros can report a review)
-- [ ] Show ratings on the Browse pros and homepage cards (already wired to `average_rating` and `total_reviews`)
+- [x] Reviews: any logged-in user can review a pro (not themselves), one review per pro, 1-5 stars plus a comment, and they can edit or delete it (`supabase/2026-10-15-reviews.sql`)
+- [x] Reviews locked down: nobody can change who a review is for or fake someone else's, and pros can only write a reply
+- [x] Pros can reply publicly from their dashboard
+- [x] Average rating and review count update automatically, and show on profiles, Browse pros and the homepage
+- [x] Reviews show first name and last initial only; Privacy Policy and Terms updated
+- [x] To hide a review: Supabase -> Table Editor -> reviews -> set is_visible to false (the rating updates automatically)
+- [ ] Email pros when they get a new review (needs the hello@ email set up and verified in Resend first)
 
 ## Phase 4: Get the first 50 pros (business plan Goal 2)
 

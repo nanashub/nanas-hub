@@ -5,6 +5,7 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ProfileReviews from "@/components/reviews/ProfileReviews";
 import { OTHER, categoryLabel, categoryTags, formatDuration, formatPrice, isCategory, styleLabel } from "@/lib/categories";
 
 type Service = {
@@ -213,6 +214,15 @@ export default function PublicProProfile({ params }: { params: Promise<{ id: str
               </div>
             </section>
           )}
+
+          <ProfileReviews
+            proId={profile.id}
+            proName={displayName}
+            onRatingChange={async () => {
+              const { data } = await supabase.from("professional_profiles").select("average_rating, total_reviews").eq("user_id", profile.id).maybeSingle();
+              if (data) setProfile((prev) => prev ? { ...prev, average_rating: Number(data.average_rating) || 0, total_reviews: data.total_reviews || 0 } : prev);
+            }}
+          />
 
           <section className="text-center pt-4 space-y-3">
             {!profile.accepting_bookings && (<div className="bg-[#F5EDE6] border border-[#DDB4B0] rounded-xl px-6 py-4 max-w-md mx-auto"><p className="text-[#6B5F58] text-sm">Not accepting new bookings right now.</p></div>)}

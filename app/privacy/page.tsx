@@ -42,6 +42,7 @@ export default function PrivacyPage() {
                 <li>Instagram handle, booking link, when your slots are released, and a featured video link</li>
                 <li>photos you upload to Pro Highlights</li>
               </ul>
+              <p><strong>If you leave a review:</strong> your star rating, your comment and the date. Reviews are shown publicly with your first name and the first letter of your last name (for example &quot;Amara O.&quot;). If you&apos;re a professional, any replies you write to reviews are also shown publicly.</p>
               <p><strong>Technical information:</strong> our hosting provider records basic information such as your IP address and browser type when you visit, to keep the site running and secure. When you log in, your browser stores a sign-in token so you stay logged in.</p>
             </>
           ),
@@ -69,7 +70,8 @@ export default function PrivacyPage() {
             <>
               <p><strong>The public</strong> can see professionals&apos; profiles: business name, first and last name, town or city, categories, services and prices, photos, and the other details listed above.</p>
               <p><strong>We never show</strong> anyone&apos;s email address, phone number or full postcode on the site.</p>
-              <p><strong>Clients&apos;</strong> details aren&apos;t shown publicly.</p>
+              <p><strong>Reviews</strong> are public and show the reviewer&apos;s first name and last initial.</p>
+              <p><strong>Clients&apos;</strong> other details aren&apos;t shown publicly.</p>
             </>
           ),
         },
@@ -108,7 +110,7 @@ export default function PrivacyPage() {
           heading: "How long we keep it",
           body: (
             <ul>
-              <li><strong>Accounts and profiles:</strong> until you delete your account.</li>
+              <li><strong>Accounts, profiles and reviews:</strong> until you delete them or your account. Deleting your account also deletes the reviews you&apos;ve written and, for professionals, the reviews about you.</li>
               <li><strong>Waitlist:</strong> until you ask to be removed, or 12 months after we launch in your area, whichever is sooner.</li>
               <li><strong>Deleted accounts:</strong> removed straight away from the live site. Copies may remain in our providers&apos; backups for up to 30 days before they&apos;re overwritten.</li>
             </ul>

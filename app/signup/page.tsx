@@ -15,10 +15,17 @@ export default function SignupPage() {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [agreed, setAgreed] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    if (!agreed) {
+      setError(userType === "pro"
+        ? "Please confirm you're 18 or over and agree to the Terms and Privacy Policy."
+        : "Please confirm you're 16 or over and agree to the Terms and Privacy Policy.");
+      return;
+    }
     setLoading(true);
 
     const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
@@ -122,6 +129,21 @@ export default function SignupPage() {
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-3 rounded-xl bg-white border border-[#E8DCD0] outline-none focus:border-[#B8746E] text-[#2A2521]"
             />
+
+            <label htmlFor="agree" className="flex items-start gap-3 text-sm text-[#3D2F2A] cursor-pointer">
+              <input
+                id="agree"
+                type="checkbox"
+                checked={agreed}
+                onChange={(e) => setAgreed(e.target.checked)}
+                className="mt-0.5 w-4 h-4 accent-[#3D2F2A] shrink-0"
+              />
+              <span>
+                I&apos;m {userType === "pro" ? "18" : "16"} or over and I agree to the{" "}
+                <Link href="/terms" target="_blank" className="text-[#B8746E] font-semibold hover:underline">Terms of Use</Link> and{" "}
+                <Link href="/privacy" target="_blank" className="text-[#B8746E] font-semibold hover:underline">Privacy Policy</Link>.
+              </span>
+            </label>
 
             {error && (
               <p className="text-sm text-[#B8746E] text-center">{error}</p>

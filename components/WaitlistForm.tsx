@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { joinWaitlist } from "@/app/actions";
 
 export default function WaitlistForm({ theme = "light" }: { theme?: "light" | "dark" }) {
@@ -50,7 +51,8 @@ export default function WaitlistForm({ theme = "light" }: { theme?: "light" | "d
       </form>
       {status === "error" && <p className={`text-sm mt-3 text-center ${isDark ? "text-rose-200" : "text-[#B8746E]"}`}>{message}</p>}
       <p className={`text-xs mt-3 text-center ${isDark ? "text-white/60" : "text-[#6B5F58]"}`}>
-        Be the first to know when we launch in your area.
+        Be the first to know when we launch in your area.{" "}
+        <Link href="/privacy" className="underline hover:no-underline">Privacy Policy</Link>
       </p>
     </div>
   );

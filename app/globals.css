@@ -31,3 +31,21 @@ body {
 .font-serif {
   font-family: var(--font-cormorant), Georgia, serif;
 }
+/* Lists and links inside the Privacy Policy and Terms pages */
+.legal-body ul {
+  list-style: disc;
+  padding-left: 1.25rem;
+  display: grid;
+  gap: 0.35rem;
+}
+.legal-body a {
+  color: var(--rose);
+  font-weight: 600;
+}
+.legal-body a:hover {
+  text-decoration: underline;
+}
+.legal-body strong {
+  color: var(--ink);
+  font-weight: 600;
+}

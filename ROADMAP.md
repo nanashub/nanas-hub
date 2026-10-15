@@ -49,7 +49,10 @@ Last updated: 15 October 2026
 - [x] Categories split into 12 groups (e.g. Single plait styles, Cornrows, Lashes, Brows) with a style dropdown, plus Other with the pro's own description (`supabase/2026-10-15-category-styles.sql`)
 - [x] "Delete my account" on the account page (`supabase/2026-10-15-services-and-account-deletion.sql`)
 - [x] Daily keep-alive so the free Supabase project doesn't pause (`app/api/keep-alive/route.ts`, scheduled in `vercel.json`)
-- [ ] Write a privacy policy and terms (needed under UK GDPR before launch)
+- [x] Privacy Policy (`/privacy`) and Terms of Use (`/terms`), linked from the footer, sign-up (with age checkbox: clients 16+, pros 18+) and waitlist
+- [ ] Set up the hello@nanashub.co.uk email (Zoho Mail free plan, or Namecheap forwarding) - the policies already use this address
+- [ ] Do the ICO's free self-assessment at ico.org.uk and pay the data protection fee if needed (about £52 a year, £47 by Direct Debit)
+- [ ] Get the Privacy Policy and Terms checked (for example by a free small-business legal clinic) before growing
 - [ ] Ask pros for a booking link or Instagram handle when they set up their profile
 - [ ] Test everything on a phone: sign up, edit profile, browse, Book now
 

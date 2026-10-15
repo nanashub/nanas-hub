@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Footer() {
   return (
     <footer className="border-t border-[#E8DCD0] bg-[#FBF8F5] mt-0">
@@ -8,6 +10,11 @@ export default function Footer() {
         <p className="text-sm text-[#6B5F58] mb-6">
           The UK&apos;s home for Black beauty professionals.
         </p>
+        <nav aria-label="Legal" className="flex justify-center gap-5 text-xs text-[#6B5F58] mb-4">
+          <Link href="/privacy" className="hover:text-[#B8746E] hover:underline">Privacy Policy</Link>
+          <Link href="/terms" className="hover:text-[#B8746E] hover:underline">Terms of Use</Link>
+          <a href="mailto:hello@nanashub.co.uk" className="hover:text-[#B8746E] hover:underline">hello@nanashub.co.uk</a>
+        </nav>
         <p className="text-xs text-[#B5A89A]">
           © {new Date().getFullYear()} Nana&apos;s Hub. All rights reserved.
         </p>

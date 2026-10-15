@@ -51,7 +51,7 @@ Last updated: 15 October 2026
 - [x] Daily keep-alive so the free Supabase project doesn't pause (`app/api/keep-alive/route.ts`, scheduled in `vercel.json`)
 - [x] Privacy Policy (`/privacy`) and Terms of Use (`/terms`), linked from the footer, sign-up (with age checkbox: clients 16+, pros 18+) and waitlist
 - [ ] Set up the hello@nanashub.co.uk email (Zoho Mail Lite, leave the VAT field blank) - the policies already use this address
-- [ ] Do the ICO's free self-assessment at ico.org.uk and pay the data protection fee if needed (about £52 a year, £47 by Direct Debit)
+- [x] ICO self-assessment done (15 October 2026): exempt for now, as not yet trading. Result saved with business records
 - [ ] Get the Privacy Policy and Terms checked (for example by a free small-business legal clinic) before growing
 - [x] Pros must add a booking link or Instagram before taking bookings
 - [ ] Test everything on a phone: sign up, edit profile, browse, Book now
@@ -84,6 +84,7 @@ Last updated: 15 October 2026
 
 ## Phase 6: Earning money
 
+- [ ] Redo the ICO self-assessment before charging anyone (ico.org.uk/for-organisations/data-protection-fee/self-assessment). It will likely say to pay the fee (about £47 a year by Direct Debit)
 - [ ] Build Pro plan (£10/month) with Stripe subscriptions
 - [ ] Decide what Pro includes: analytics, boosted visibility, promotions, client tools
 - [ ] Pro stats: track profile views and Book now / Instagram clicks (no personal data), show them on the dashboard for Pro pros, and update the Privacy Policy. Start tracking before Pro launches so there's data to show

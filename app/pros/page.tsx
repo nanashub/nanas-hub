@@ -31,7 +31,7 @@ export default function SearchPage() {
       if (!proProfiles) { setLoading(false); return; }
       const userIds = proProfiles.map((p) => p.user_id);
       if (userIds.length === 0) { setPros([]); setLoading(false); return; }
-      const { data: userProfiles } = await supabase.from("profiles").select("*").in("id", userIds);
+      const { data: userProfiles } = await supabase.from("profiles").select("id, first_name, last_name, location_city").in("id", userIds);
       const merged: ProListing[] = proProfiles.map((p) => {
         const user = userProfiles?.find((u) => u.id === p.user_id);
         return {

@@ -23,8 +23,8 @@ export default function AccountPage() {
     async function loadProfile() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { router.push("/login"); return; }
-      const { data: profileData } = await supabase.from("profiles").select("*").eq("id", user.id).single();
-      setProfile(profileData);
+      const { data: profileData } = await supabase.from("profiles").select("id, first_name, last_name, user_type").eq("id", user.id).single();
+      setProfile(profileData ? { ...profileData, email: user.email || "" } : null);
       setLoading(false);
     }
     loadProfile();

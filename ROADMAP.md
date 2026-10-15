@@ -40,7 +40,8 @@ Last updated: 26 September 2026
 ## Phase 2: Tidy up before inviting pros
 
 - [ ] Check `RESEND_API_KEY` is set in Vercel (Settings → Environment Variables)
-- [ ] Turn on and check Row Level Security in Supabase for every table, so people can only edit their own profile and data
+- [ ] Turn on and check Row Level Security in Supabase for every table, so people can only edit their own profile and data (code done; run `supabase/2026-10-15-security-fixes.sql` in the Supabase SQL Editor after the code is live)
+- [ ] Phase 3: lock down reviews so clients can't change who a review is for, and pros can't hide reviews
 - [ ] Decide what to do with the old booking request flow (`/book/[id]` page, bookings table, dashboard requests): remove it, or keep it for later
 - [ ] Repurpose the pro dashboard around the new model (profile views, Book now clicks, reviews)
 - [ ] Add a service/category filter to Browse pros, so the homepage category buttons (Braids, Locs, Lashes and so on) take clients to matching pros

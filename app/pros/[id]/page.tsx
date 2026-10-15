@@ -11,7 +11,6 @@ type ProfileWithPro = {
   first_name: string | null;
   last_name: string | null;
   location_city: string | null;
-  location_postcode: string | null;
   business_name: string;
   bio: string;
   years_experience: number;
@@ -36,7 +35,7 @@ export default function PublicProProfile({ params }: { params: Promise<{ id: str
 
   useEffect(() => {
     async function loadProfile() {
-      const { data: userProfile } = await supabase.from("profiles").select("id, first_name, last_name, location_city, location_postcode, user_type").eq("id", id).single();
+      const { data: userProfile } = await supabase.from("profiles").select("id, first_name, last_name, location_city, user_type").eq("id", id).single();
       if (!userProfile || userProfile.user_type !== "pro") { setNotFoundState(true); setLoading(false); return; }
       const { data: p } = await supabase.from("professional_profiles").select("*").eq("user_id", id).maybeSingle();
       if (!p) { setNotFoundState(true); setLoading(false); return; }
@@ -45,7 +44,6 @@ export default function PublicProProfile({ params }: { params: Promise<{ id: str
         first_name: userProfile.first_name,
         last_name: userProfile.last_name,
         location_city: userProfile.location_city,
-        location_postcode: userProfile.location_postcode,
         business_name: p.business_name || "",
         bio: p.bio || "",
         years_experience: p.years_experience || 0,
@@ -90,7 +88,7 @@ export default function PublicProProfile({ params }: { params: Promise<{ id: str
               <div className="flex-1">
                 <h1 className="font-serif text-4xl md:text-5xl font-semibold text-[#2A2521] mb-1">{displayName}</h1>
                 {profile.instagram_handle && <p className="text-[#6B5F58] text-sm">@{profile.instagram_handle}</p>}
-                {profile.location_city && <p className="text-[#3D2F2A] mt-2">{profile.location_city}{profile.location_postcode && ` - ${profile.location_postcode}`}</p>}
+                {profile.location_city && <p className="text-[#3D2F2A] mt-2">{profile.location_city}</p>}
               </div>
             </div>
           </div>
